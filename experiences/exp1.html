@@ -187,6 +187,7 @@
     let mediaRecorder = null;
     let recordedChunks = [];
     let recordedBlob = null;
+    let recordedDurationSec = 0;   // 직접 잰 녹화 시간(영상 길이를 못 읽을 때의 대비책)
 
     let tracks = [];
     let sampleTimestamps = [];
@@ -262,7 +263,9 @@
     }
 
     function onRecordingStopped(){
-      recordedBlob = new Blob(recordedChunks, { type: "video/webm" });
+      recordedDurationSec = Math.min(MAX_RECORD_MS / 1000, (performance.now() - recordStartedAt) / 1000);
+      // 아이폰(Safari)은 mp4로 녹화되므로, 실제 녹화 형식 그대로 Blob 타입을 지정
+      recordedBlob = new Blob(recordedChunks, { type: (mediaRecorder && mediaRecorder.mimeType) || "video/webm" });
       if (stream) stream.getTracks().forEach(t => t.stop());
       el("reviewVideo").src = URL.createObjectURL(recordedBlob);
       el("reviewVideo").play().catch(() => {});
@@ -293,16 +296,120 @@
           delegate: "CPU"
         },
         runningMode: "VIDEO",
-        minDetectionConfidence: 0.5
+        minDetectionConfidence: 0.4
       });
     }
 
+    /* 지정한 시간으로 이동. 같은 위치이거나 이벤트가 오지 않아도 멈추지 않도록 타임아웃을 둠 */
     function seekTo(video, t){
       return new Promise((resolve) => {
-        function onSeeked(){ video.removeEventListener("seeked", onSeeked); resolve(); }
-        video.addEventListener("seeked", onSeeked);
-        video.currentTime = t;
+        let finished = false;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          video.removeEventListener("seeked", finish);
+          clearTimeout(timer);
+          resolve();
+        };
+        const timer = setTimeout(finish, 2000);
+        video.addEventListener("seeked", finish);
+        if (Math.abs(video.currentTime - t) < 0.001) setTimeout(finish, 30); // 같은 위치면 seeked가 안 올 수 있음
+        else video.currentTime = t;
       });
+    }
+
+    function withTimeout(promise, ms, message){
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(message)), ms);
+        promise.then((v) => { clearTimeout(timer); resolve(v); }, (e) => { clearTimeout(timer); reject(e); });
+      });
+    }
+
+    /* MediaRecorder로 만든 영상은 길이(duration)를 모를 수 있음(Infinity/NaN) → 끝으로 이동시켜 계산시키고, 안 되면 직접 잰 녹화 시간을 사용 */
+    async function resolveDuration(video){
+      const ok = () => Number.isFinite(video.duration) && video.duration > 0;
+      if (ok()) return video.duration;
+      await new Promise((resolve) => {
+        const check = () => { if (ok()) done(); };
+        const done = () => { video.removeEventListener("timeupdate", check); video.removeEventListener("durationchange", check); resolve(); };
+        video.addEventListener("timeupdate", check);
+        video.addEventListener("durationchange", check);
+        video.currentTime = 1e7;
+        setTimeout(done, 2000);
+      });
+      await seekTo(video, 0);
+      if (ok()) return video.duration;
+      return recordedDurationSec;
+    }
+
+    function detectAndTrack(video, t){
+      const result = faceDetector.detectForVideo(video, performance.now());
+      const boxes = (result.detections || []).map((d) => ({
+        x: d.boundingBox.originX, y: d.boundingBox.originY,
+        w: d.boundingBox.width, h: d.boundingBox.height
+      }));
+      assignToTracks(boxes, t, video.videoWidth);
+      sampleTimestamps.push(t);
+    }
+
+    /* 방법 1(기본): 영상을 실제로 재생하면서 화면에 표시된 프레임마다 인식 — 프레임이 준비된 뒤에만 인식하므로 모바일에서도 안정적 */
+    function sampleByPlayback(video, duration){
+      return new Promise((resolve) => {
+        const total = Math.max(1, Math.ceil(duration * SAMPLE_FPS));
+        let lastT = -1, finished = false;
+        const finish = (ok) => {
+          if (finished) return;
+          finished = true;
+          clearTimeout(guard);
+          video.onended = null;
+          try { video.pause(); } catch (_) {}
+          resolve(ok);
+        };
+        const guard = setTimeout(() => finish(sampleTimestamps.length > 0), (duration + 6) * 1000 * 1.6);
+        video.onended = () => finish(sampleTimestamps.length > 0);
+        const schedule = () => {
+          if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(onFrame);
+          else requestAnimationFrame(() => onFrame(0, null));
+        };
+        const onFrame = (_now, meta) => {
+          if (finished) return;
+          const t = meta && typeof meta.mediaTime === "number" ? meta.mediaTime : video.currentTime;
+          if (t - lastT >= 1 / SAMPLE_FPS - 0.01) {
+            lastT = t;
+            try { detectAndTrack(video, t); } catch (_) { /* 한 프레임 실패는 건너뜀 */ }
+            const n = sampleTimestamps.length;
+            el("analyzeProgress").style.width = Math.min(100, (t / duration) * 100) + "%";
+            el("analyzeStatus").textContent = n + " / " + total + " 프레임";
+          }
+          if (t >= duration - 0.05) { finish(sampleTimestamps.length > 0); return; }
+          schedule();
+        };
+        video.muted = true;
+        video.playbackRate = 1;
+        const p = video.play();
+        if (p && p.then) p.then(schedule).catch(() => finish(false));
+        else schedule();
+      });
+    }
+
+    /* 방법 2(대비책): 재생이 막혔을 때 시간을 옮겨가며 인식 (프레임이 그려질 때까지 잠깐 기다림) */
+    async function sampleBySeeking(video, duration){
+      const step = 1 / SAMPLE_FPS;
+      const times = [];
+      for (let t = 0; t < duration - 0.05; t += step) times.push(t);
+      for (let i = 0; i < times.length; i++){
+        await seekTo(video, times[i]);
+        await new Promise((r) => {
+          if (video.requestVideoFrameCallback) {
+            const to = setTimeout(r, 150);
+            video.requestVideoFrameCallback(() => { clearTimeout(to); r(); });
+          } else setTimeout(r, 80);
+        });
+        try { detectAndTrack(video, times[i]); } catch (_) {}
+        el("analyzeProgress").style.width = ((i + 1) / times.length * 100) + "%";
+        el("analyzeStatus").textContent = (i + 1) + " / " + times.length + " 프레임";
+      }
+      return sampleTimestamps.length > 0;
     }
 
     function assignToTracks(boxes, t, frameW){
@@ -331,35 +438,39 @@
 
     async function analyzeRecording(){
       showScreen("screen-analyzing");
-      try { await ensureFaceDetector(); }
+      el("analyzeProgress").style.width = "0%";
+      el("analyzeStatus").textContent = "얼굴 인식 모델을 불러오는 중…";
+      try { await withTimeout(ensureFaceDetector(), 40000, "모델 로딩 시간이 너무 오래 걸립니다"); }
       catch (e) { showError("얼굴 인식 모델을 불러오지 못했습니다. (" + e.message + ")", () => showScreen("screen-review")); return; }
 
+      el("analyzeStatus").textContent = "영상을 읽는 중…";
       const video = el("analysisVideo") || document.createElement("video");
       video.id = "analysisVideo";
       video.muted = true; video.playsInline = true;
+      video.setAttribute("playsinline", ""); video.setAttribute("webkit-playsinline", "");
+      video.preload = "auto";
       if (!video.isConnected) document.body.appendChild(video);
-      video.style.display = "none";
+      // display:none 이면 일부 모바일 브라우저가 프레임을 디코딩하지 않으므로, 화면 밖의 아주 작은 영상으로 둠
+      video.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;";
       video.src = URL.createObjectURL(recordedBlob);
-      await new Promise((res) => { video.onloadedmetadata = res; });
+      try {
+        await withTimeout(new Promise((res, rej) => { video.onloadedmetadata = res; video.onerror = () => rej(new Error("영상 형식을 읽을 수 없어요")); }), 12000, "영상을 불러오는 데 시간이 너무 오래 걸립니다");
+      } catch (e) { showError("촬영한 영상을 읽지 못했습니다. (" + e.message + ")", () => showScreen("screen-review")); return; }
 
-      const duration = video.duration;
-      const step = 1 / SAMPLE_FPS;
-      sampleTimestamps = [];
-      for (let t = 0; t < duration; t += step) sampleTimestamps.push(t);
-      tracks = [];
+      let duration = await resolveDuration(video);
+      duration = Math.min(duration, MAX_RECORD_MS / 1000 + 1);
+      if (!(duration > 0)) { showError("촬영한 영상의 길이를 확인하지 못했습니다. 다시 촬영해 주세요.", () => showScreen("screen-review")); return; }
 
-      for (let i = 0; i < sampleTimestamps.length; i++){
-        const t = sampleTimestamps[i];
-        await seekTo(video, t);
-        const result = faceDetector.detectForVideo(video, performance.now());
-        const boxes = (result.detections || []).map((d) => ({
-          x: d.boundingBox.originX, y: d.boundingBox.originY,
-          w: d.boundingBox.width, h: d.boundingBox.height
-        }));
-        assignToTracks(boxes, t, video.videoWidth);
-
-        el("analyzeProgress").style.width = ((i + 1) / sampleTimestamps.length * 100) + "%";
-        el("analyzeStatus").textContent = (i + 1) + " / " + sampleTimestamps.length + " 프레임";
+      tracks = []; sampleTimestamps = [];
+      await seekTo(video, 0);
+      let ok = await sampleByPlayback(video, duration);
+      if (!ok) {                                 // 재생이 막혀 있거나 프레임을 못 얻은 경우 → 시간 이동 방식으로 다시 시도
+        tracks = []; sampleTimestamps = [];
+        ok = await sampleBySeeking(video, duration);
+      }
+      if (!ok || sampleTimestamps.length === 0) {
+        showError("영상에서 분석할 프레임을 읽지 못했습니다. 다시 촬영해 주세요.", () => showScreen("screen-review"));
+        return;
       }
 
       const minSamples = Math.max(2, Math.floor(sampleTimestamps.length * 0.2));
@@ -480,7 +591,7 @@
         const box = getInterpolatedBox(selectedTrack, t);
         const crop = smoothedCrop(computeCropRect(box, video.videoWidth, video.videoHeight, OUT_W / OUT_H));
         ctx.drawImage(video, crop.x, crop.y, crop.w, crop.h, 0, 0, OUT_W, OUT_H);
-        el("renderProgress").style.width = Math.min(100, (t / video.duration) * 100) + "%";
+        el("renderProgress").style.width = Math.min(100, (t / (Number.isFinite(video.duration) ? video.duration : (recordedDurationSec || 1))) * 100) + "%";
         if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(drawFrame);
         else requestAnimationFrame(drawFrame);
       }
@@ -490,7 +601,7 @@
       else requestAnimationFrame(drawFrame);
 
       await done;
-      const outBlob = new Blob(outChunks, { type: "video/webm" });
+      const outBlob = new Blob(outChunks, { type: outRecorder.mimeType || "video/webm" });
       const url = URL.createObjectURL(outBlob);
       el("resultVideo").src = url;
       el("resultVideo").play().catch(() => {});
