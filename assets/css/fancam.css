@@ -672,3 +672,14 @@
 .text-link:hover {
   color: #fff;
 }
+
+/* 촬영 화면 안내 문구 */
+.cap-hint {
+  margin: 0 0 8px;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}

@@ -132,6 +132,7 @@
         </div>
 
         <div class="camera-bottom">
+          <p class="cap-hint" id="capHint"></p>
           <div class="quick-row">
             <div class="zoom-pill" id="zoomPill">
               <button class="zoom-opt" data-zoom="0.6">.6</button>
@@ -179,7 +180,7 @@
     const el = (id) => document.getElementById(id);
     const MAX_RECORD_MS = 8000;
     const SAMPLE_FPS = 5;
-    const OUT_W = 1080, OUT_H = 1080;
+    const OUT_W = 720, OUT_H = 720;   // 결과 영상 크기 (모바일 부담을 줄이려고 1080 → 720)
 
     let faceDetector = null;
     let stream = null;
@@ -207,6 +208,7 @@
 
     function resetCameraHud(){
       el("captureVideo").style.transform = "scale(1)";
+      zoomCaps = null;
       document.querySelectorAll(".zoom-opt").forEach(b => b.classList.toggle("is-active", b.dataset.zoom === "1"));
       el("gridToggleBtn").classList.remove("is-active");
       el("gridOverlay").hidden = true;
@@ -216,7 +218,7 @@
       if (stream) stream.getTracks().forEach(t => t.stop());
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 }, aspectRatio: { ideal: 16 / 9 } },
+          video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 16 / 9 } },
           audio: false
         });
       } catch (e1) {
@@ -228,7 +230,35 @@
         }
       }
       el("captureVideo").srcObject = stream;
+      setupZoomSupport();
       return true;
+    }
+
+    /* 줌: 안드로이드 크롬 후면 카메라는 실제 줌(녹화에도 적용)을 쓰고, 지원하지 않으면 미리보기만 확대하고 안내를 보여줌 */
+    let zoomCaps = null;
+
+    function setupZoomSupport(){
+      zoomCaps = null;
+      try {
+        const track = stream && stream.getVideoTracks()[0];
+        const caps = track && track.getCapabilities ? track.getCapabilities() : null;
+        if (caps && caps.zoom && caps.zoom.max > caps.zoom.min) zoomCaps = caps.zoom;
+      } catch (_) {}
+      el("capHint").textContent = zoomCaps
+        ? "얼굴이 화면 높이의 1/6 이상 크게 보이면 잘 잡혀요 · 줌으로 가까이 당겨 보세요"
+        : "얼굴이 화면 높이의 1/6 이상 크게 보이게, 가까이서 찍으면 잘 잡혀요";
+    }
+
+    async function applyZoom(scale){
+      if (zoomCaps) {
+        const value = Math.max(zoomCaps.min, Math.min(zoomCaps.max, scale));
+        try {
+          await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ zoom: value }] });
+          el("captureVideo").style.transform = "scale(1)";      // 실제 줌이 적용되므로 미리보기 확대는 쓰지 않음
+          return;
+        } catch (_) { /* 실패하면 미리보기 확대로 대체 */ }
+      }
+      el("captureVideo").style.transform = "scale(" + Math.max(1, scale) + ")";
     }
 
     function pickMimeType(){
@@ -285,19 +315,39 @@
 
     /* ---------------- STAGE 2: 보정 (촬영본을 다시 불러와 처리) ---------------- */
 
-    async function ensureFaceDetector(){
-      if (faceDetector) return;
-      const filesetResolver = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm"
-      );
-      faceDetector = await FaceDetector.createFromOptions(filesetResolver, {
+    let faceDelegate = "";
+    let filesetResolverCache = null;
+    let detTs = 0;
+    const nextTs = () => (detTs = Math.max(detTs + 1, performance.now()));   // VIDEO 모드는 시간이 항상 증가해야 함
+
+    async function createFaceDetector(delegate){
+      if (!filesetResolverCache) {
+        filesetResolverCache = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm"
+        );
+      }
+      faceDetector = await FaceDetector.createFromOptions(filesetResolverCache, {
         baseOptions: {
           modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
-          delegate: "CPU"
+          delegate
         },
         runningMode: "VIDEO",
         minDetectionConfidence: 0.4
       });
+      faceDelegate = delegate;
+    }
+
+    // 모바일 GPU로 먼저 시도하고, 안 되면 CPU로 자동 전환
+    async function ensureFaceDetector(){
+      if (faceDetector) return;
+      try { await createFaceDetector("GPU"); }
+      catch (e) { await createFaceDetector("CPU"); }
+    }
+
+    // 실제로 한 번 돌려 보고 GPU가 오류를 내면 CPU로 교체 (모델 생성은 되는데 실행에서 실패하는 기기 대비)
+    async function warmUpDetector(video){
+      try { faceDetector.detectForVideo(video, nextTs()); }
+      catch (e) { if (faceDelegate === "GPU") await createFaceDetector("CPU"); }
     }
 
     /* 지정한 시간으로 이동. 같은 위치이거나 이벤트가 오지 않아도 멈추지 않도록 타임아웃을 둠 */
@@ -342,12 +392,45 @@
       return recordedDurationSec;
     }
 
+    const cropCanvas = document.createElement("canvas");
+    let missCount = 0;
+
+    // 전체 프레임에서 못 찾았을 때만 쓰는 보완: 영상의 일부를 확대해서 다시 찾음 (비용은 실패한 프레임에만 듦)
+    function detectInCrops(video){
+      const vw = video.videoWidth, vh = video.videoHeight;
+      const cw = Math.round(vw * 0.5), ch = Math.round(vh * 0.5);
+      cropCanvas.width = 480; cropCanvas.height = Math.round(480 * ch / cw);
+      const cctx = cropCanvas.getContext("2d");
+      const last = tracks.length ? tracks[tracks.length - 1].samples[tracks[tracks.length - 1].samples.length - 1].box : null;
+      const centers = last
+        ? [[last.x + last.w / 2, last.y + last.h / 2]]                      // 직전에 본 얼굴 근처 먼저
+        : [[vw * 0.5, vh * 0.5], [vw * 0.25, vh * 0.5], [vw * 0.75, vh * 0.5]]; // 없으면 가운데, 왼쪽, 오른쪽
+      for (const [cx, cy] of centers){
+        const x0 = Math.max(0, Math.min(vw - cw, cx - cw / 2));
+        const y0 = Math.max(0, Math.min(vh - ch, cy - ch / 2));
+        cctx.drawImage(video, x0, y0, cw, ch, 0, 0, cropCanvas.width, cropCanvas.height);
+        const r = faceDetector.detectForVideo(cropCanvas, nextTs());
+        const found = (r.detections || []).map((d) => ({
+          x: x0 + d.boundingBox.originX * (cw / cropCanvas.width),
+          y: y0 + d.boundingBox.originY * (ch / cropCanvas.height),
+          w: d.boundingBox.width * (cw / cropCanvas.width),
+          h: d.boundingBox.height * (ch / cropCanvas.height)
+        }));
+        if (found.length) return found;
+      }
+      return [];
+    }
+
     function detectAndTrack(video, t){
-      const result = faceDetector.detectForVideo(video, performance.now());
-      const boxes = (result.detections || []).map((d) => ({
+      const result = faceDetector.detectForVideo(video, nextTs());
+      let boxes = (result.detections || []).map((d) => ({
         x: d.boundingBox.originX, y: d.boundingBox.originY,
         w: d.boundingBox.width, h: d.boundingBox.height
       }));
+      if (boxes.length === 0) {
+        missCount++;
+        if (missCount % 2 === 1) { try { boxes = detectInCrops(video); } catch (_) {} }   // 못 찾은 프레임 중 2번에 1번만 보완 시도 (모바일 부담 감소)
+      } else missCount = 0;
       assignToTracks(boxes, t, video.videoWidth);
       sampleTimestamps.push(t);
     }
@@ -457,6 +540,7 @@
         await withTimeout(new Promise((res, rej) => { video.onloadedmetadata = res; video.onerror = () => rej(new Error("영상 형식을 읽을 수 없어요")); }), 12000, "영상을 불러오는 데 시간이 너무 오래 걸립니다");
       } catch (e) { showError("촬영한 영상을 읽지 못했습니다. (" + e.message + ")", () => showScreen("screen-review")); return; }
 
+      await warmUpDetector(video);
       let duration = await resolveDuration(video);
       duration = Math.min(duration, MAX_RECORD_MS / 1000 + 1);
       if (!(duration > 0)) { showError("촬영한 영상의 길이를 확인하지 못했습니다. 다시 촬영해 주세요.", () => showScreen("screen-review")); return; }
@@ -574,7 +658,7 @@
       outCanvas.width = OUT_W; outCanvas.height = OUT_H;
       const ctx = outCanvas.getContext("2d");
 
-      const outStream = outCanvas.captureStream(30);
+      const outStream = outCanvas.captureStream(24);
       const mimeType = pickMimeType();
       const outRecorder = mimeType ? new MediaRecorder(outStream, { mimeType }) : new MediaRecorder(outStream);
       const outChunks = [];
@@ -639,8 +723,7 @@
       btn.onclick = () => {
         document.querySelectorAll(".zoom-opt").forEach(b => b.classList.remove("is-active"));
         btn.classList.add("is-active");
-        const scale = Math.max(1, parseFloat(btn.dataset.zoom));
-        el("captureVideo").style.transform = "scale(" + scale + ")";
+        applyZoom(parseFloat(btn.dataset.zoom));
       };
     });
 
