@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="58" height="52" viewBox="0 0 58 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group-2">
+<path id="Combined-Shape" fill-rule="evenodd" clip-rule="evenodd" d="M10 16C10.1219 16 10.2433 16.0022 10.3642 16.0065C9.48027 18.5075 9 21.1977 9 24C9 28.3717 10.1688 32.4703 12.211 36.0005L11 36L11.001 35.9505C10.6718 35.9832 10.3379 36 10 36C4.477 36 0 31.523 0 26C0 20.477 4.477 16 10 16Z" fill="#F1F1F1"/>
+<g id="Weather4.0/Sunny">
+<path id="Fill-1" fill-rule="evenodd" clip-rule="evenodd" d="M33 48C19.745 48 9 37.255 9 24C9 10.745 19.745 0 33 0C46.255 0 57 10.745 57 24C57 37.255 46.255 48 33 48Z" fill="#D5BB75"/>
+<path id="Fill-1_2" fill-rule="evenodd" clip-rule="evenodd" d="M33 44C21.9542 44 13 35.0458 13 24C13 12.9542 21.9542 4 33 4C44.0458 4 53 12.9542 53 24C53 35.0458 44.0458 44 33 44Z" fill="#FFCF50"/>
+</g>
+<g id="Group">
+<path id="Cloud_back" fill-rule="evenodd" clip-rule="evenodd" d="M37 39V52H51.4C55.0448 52 58 49.0896 58 45.5C58 41.9104 55.0448 39 51.4 39H37Z" fill="#F1F1F1"/>
+<path id="Cloud_front" fill-rule="evenodd" clip-rule="evenodd" d="M48 41C48 47.0753 43.0747 52 37 52C30.9247 52 26 47.0753 26 41C26 34.9247 30.9247 30 37 30C43.0747 30 48 34.9247 48 41Z" fill="white"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,59 @@
+/* Galaxy home screen (copied from index.html slide 3) for reuse inside experiences, e.g. Privacy Display. Scoped under .hs */
+.hs, .hs *, .hs *::before, .hs *::after { box-sizing: border-box; }
+.hs { position: absolute; inset: 0; overflow: hidden; color: #fff; font-family: "Pretendard", "Apple SD Gothic Neo", -apple-system, sans-serif; }
+.hs img { display: block; max-width: none; }
+.hs-abs { position: absolute; display: block; }
+/* 월페이퍼: 이미지 2장(바탕 + 겹침). 월페이퍼만 바꾸려면 assets/img/homescreen/wallpaper-*.png 를 교체 */
+.hs-wp, .hs-wp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* 상태바 */
+.hs-sb { position: absolute; left: 0; right: 0; top: 6px; height: 22px; z-index: 3; }
+.hs-sb-time { position: absolute; left: 21px; top: calc(50% - 8px); font-size: 13px; font-weight: 700; line-height: normal; white-space: nowrap; }
+.hs-sb-bar { position: absolute; background: #fff; border-radius: 0.656px; }
+.hs-sb-wifi { right: 60px; top: 3px; width: 17px; height: 17px; }
+/* 아래에서부터 쌓이는 홈 구성: 위젯 영역이 남는 높이를 차지함 */
+.hs-stack { position: absolute; inset: 0; padding-top: 40px; display: flex; flex-direction: column; }
+.hs-stack-bottom { justify-content: flex-end; pointer-events: none; }
+.hs-stack-bottom > * { pointer-events: auto; }
+/* hidden slides must not catch taps */
+.hs-wrow { flex: 1; min-height: 0; display: flex; align-items: flex-end; padding: 12px 24px; overflow: hidden; }
+.hs-wcols { display: flex; gap: 24px; height: 165px; width: 100%; flex: none; }
+.hs-w-weather { position: relative; flex: none; width: 144px; height: 165px; overflow: hidden; color: #fcfcff;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%22144%22 height=%22165%22 viewBox=%220 0 144 165%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22Group%22%3E%3Cpath id=%22Vector%22 d=%22M32.5764 0L111.424 0C122.751 0 126.859 1.17817 131 3.39053C135.141 5.60289 138.391 8.84944 140.606 12.9862C142.821 17.1229 144 21.2262 144 32.5416V132.458C144 143.774 142.821 147.877 140.606 152.014C138.391 156.151 135.141 159.397 131 161.609C126.859 163.822 122.751 165 111.424 165H32.5764C21.2489 165 17.1413 163.822 13.0001 161.609C8.8589 159.397 5.60888 156.151 3.39416 152.014C1.17943 147.877 0 143.774 0 132.458L0 32.5416C0 21.2262 1.17943 17.1229 3.39416 12.9862C5.60888 8.84944 8.8589 5.60289 13.0001 3.39053C17.1413 1.17817 21.2489 0 32.5764 0Z%22 fill=%22white%22/%3E%3C/g%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%22144%22 height=%22165%22 viewBox=%220 0 144 165%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22Group%22%3E%3Cpath id=%22Vector%22 d=%22M32.5764 0L111.424 0C122.751 0 126.859 1.17817 131 3.39053C135.141 5.60289 138.391 8.84944 140.606 12.9862C142.821 17.1229 144 21.2262 144 32.5416V132.458C144 143.774 142.821 147.877 140.606 152.014C138.391 156.151 135.141 159.397 131 161.609C126.859 163.822 122.751 165 111.424 165H32.5764C21.2489 165 17.1413 163.822 13.0001 161.609C8.8589 159.397 5.60888 156.151 3.39416 152.014C1.17943 147.877 0 143.774 0 132.458L0 32.5416C0 21.2262 1.17943 17.1229 3.39416 12.9862C5.60888 8.84944 8.8589 5.60289 13.0001 3.39053C17.1413 1.17817 21.2489 0 32.5764 0Z%22 fill=%22white%22/%3E%3C/g%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; }
+.hs-w-text { position: absolute; left: 14px; top: 73px; width: 103px; height: 78px; }
+.hs-w-text p { position: absolute; left: 0; right: 0; margin: 0; line-height: normal; font-size: 12px; white-space: pre; text-align: left; }
+.hs-w-deg { top: 0; font-size: 21px !important; }
+.hs-w-d1 { top: 26px; }
+.hs-w-d2 { top: 44px; }
+.hs-w-loc { top: 62px; opacity: 0.7; }
+.hs-wcol { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0; }
+.hs-w-oobe { position: relative; height: 68px; flex: none; }
+.hs-w-oobe > img { inset: 0; width: 100%; height: 100%; border-radius: 999px; }
+.hs-oobe-t { position: absolute; left: 50%; top: 50%; width: 113px; transform: translate(-50%, -50%); text-align: center; font-size: 15.1px; font-weight: 600; color: #000; }
+.hs-w-health { position: relative; height: 68px; flex: none; }
+.hs-h-blur { inset: 4.41% 0; border-radius: 999px; background: rgba(242,242,242,0.18); -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+.hs-h-bg { inset: 0; border-radius: 1014px; background: rgba(252,252,255,0.75); border: 0.5px solid rgba(252,252,255,0.2); }
+.hs-hw-t { position: absolute; font-size: 11px; font-weight: 600; line-height: normal; color: #010102; white-space: nowrap; }
+/* 구글 검색창 */
+.hs-gbar { flex: none; height: 112px; padding: 16px 24px; display: flex; align-items: center; }
+.hs-gbar-in { width: 100%; background: #fff; opacity: 0.9; border-radius: 33px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+.hs-g-logo { width: 28.064px; height: 28.636px; margin: 1.68px 1.57px 1.68px 2.37px; }
+.hs-g-act { display: flex; align-items: center; gap: 12px; }
+.hs-g-voice { width: 17.529px; height: 25.432px; margin: 3.3px 7.2px; }
+.hs-g-lens { width: 32px; height: 32px; }
+/* 앱 아이콘 줄 / 독 */
+.hs-approw { position: relative; flex: none; padding: 8px 16px; height: 112px; }
+.hs-approw-in { display: flex; justify-content: space-between; }
+.hs-app { position: relative; flex: 0 1 80px; width: 80px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 12px; }
+.hs-app-ic { width: 60px; height: 60px; }
+.hs-app-ic.hs-masked { -webkit-mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22App icons%22%3E%3Cpath id=%22container%22 fill-rule=%22evenodd%22 clip-rule=%22evenodd%22 d=%22M7.02833 6.66667C12.5312 1.125 20.7796 0 30 0C39.2208 0 47.4692 1.125 52.9721 6.66667C57.3579 11.0833 60 18.3058 60 30C60 41.6942 57.3575 48.9167 52.9713 53.3338C47.4683 58.8746 39.2204 60 30 60C20.7804 60 12.5321 58.8746 7.02917 53.3338C2.6425 48.9167 1.43051e-06 41.6942 1.43051e-06 30C1.43051e-06 18.3058 2.64208 11.0837 7.02833 6.66667Z%22 fill=%22url%28%23paint0_linear_393_14615%29%22/%3E%3Cpath id=%22Vector 921%22 d=%22M6.30197 6.21037L53 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Cpath id=%22Vector 922%22 d=%22M52.9191 6.21037L6.2211 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Ccircle id=%22Ellipse 1496%22 cx=%2230%22 cy=%2230%22 r=%2220.5%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3C/g%3E%3Cdefs%3E%3ClinearGradient id=%22paint0_linear_393_14615%22 x1=%2230%22 y1=%220%22 x2=%2230%22 y2=%2260%22 gradientUnits=%22userSpaceOnUse%22%3E%3Cstop stop-color=%22white%22/%3E%3Cstop offset=%221%22 stop-color=%22%23868E9C%22/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22App icons%22%3E%3Cpath id=%22container%22 fill-rule=%22evenodd%22 clip-rule=%22evenodd%22 d=%22M7.02833 6.66667C12.5312 1.125 20.7796 0 30 0C39.2208 0 47.4692 1.125 52.9721 6.66667C57.3579 11.0833 60 18.3058 60 30C60 41.6942 57.3575 48.9167 52.9713 53.3338C47.4683 58.8746 39.2204 60 30 60C20.7804 60 12.5321 58.8746 7.02917 53.3338C2.6425 48.9167 1.43051e-06 41.6942 1.43051e-06 30C1.43051e-06 18.3058 2.64208 11.0837 7.02833 6.66667Z%22 fill=%22url%28%23paint0_linear_393_14615%29%22/%3E%3Cpath id=%22Vector 921%22 d=%22M6.30197 6.21037L53 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Cpath id=%22Vector 922%22 d=%22M52.9191 6.21037L6.2211 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Ccircle id=%22Ellipse 1496%22 cx=%2230%22 cy=%2230%22 r=%2220.5%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3C/g%3E%3Cdefs%3E%3ClinearGradient id=%22paint0_linear_393_14615%22 x1=%2230%22 y1=%220%22 x2=%2230%22 y2=%2260%22 gradientUnits=%22userSpaceOnUse%22%3E%3Cstop stop-color=%22white%22/%3E%3Cstop offset=%221%22 stop-color=%22%23868E9C%22/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.hs-app-lab { font-size: 12px; line-height: normal; text-align: center; color: #fff; }
+.hs-dock { flex: none; padding: 16px; display: flex; justify-content: space-between; }
+/* 페이지 점 / 내비게이션 바 */
+.hs-pind { flex: none; height: 49px; padding: 16px 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+.hs-pind > * { width: 17px; height: 17px; display: block; position: relative; }
+.hs-pi-un i { position: absolute; left: 29.41%; right: 29.41%; height: 8.82%; min-height: 1.5px; background: #fff; opacity: 0.65; border-radius: 0.5px; }
+.hs-pi-un i:nth-child(1) { top: 32.35%; }
+.hs-pi-un i:nth-child(2) { top: 58.82%; }
+.hs-pi-dot img { position: absolute; inset: 29.41%; width: 41.18%; height: 41.18%; }
+.hs-nav { flex: none; height: 54px; padding: 12px 68px 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+.hs-nav img { width: 22px; height: 22px; }

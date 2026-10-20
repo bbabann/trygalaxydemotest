@@ -8,20 +8,24 @@
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/fancam.css" />
+  <link rel="stylesheet" href="../assets/css/intro.css" />
 </head>
 <body>
   <div class="app-frame">
     <div class="experience-page" id="fancamApp">
-      <section class="screen" id="screen-intro">
+      <section class="screen intro-layout" id="screen-intro">
         <h1>My FanCam</h1>
-        <p class="hint">먼저 영상을 끝까지 촬영합니다. 보정(인물 추적·크롭)은 촬영이 완전히 끝난 다음, 별도 단계에서 적용됩니다 — 실제 갤러리 앱의 동작과 동일한 순서입니다.</p>
-        <button class="btn btn-primary" id="startBtn">촬영 시작하기</button>
-        <a class="back-link" href="../index.html">← 홈으로 돌아가기</a>
+        <p class="hint">First, record the full video. Correction (person tracking and crop) is applied in a separate step after recording ends, the same order as the real Gallery app.</p>
+        <div class="intro-cards intro-cards--single">
+          <div class="intro-card"></div>
+        </div>
+        <button class="btn btn-primary intro-try-lg" id="startBtn" type="button">Try now</button>
+        <a class="back-link" href="../index.html?from=experience">← Back to home</a>
       </section>
 
       <section class="screen" id="screen-error" hidden>
         <p class="hint error" id="errorText"></p>
-        <button class="btn btn-primary" id="errorRetryBtn">다시 시도</button>
+        <button class="btn btn-primary" id="errorRetryBtn">Try again</button>
       </section>
     </div>
 
@@ -29,72 +33,72 @@
       <video id="reviewVideo" autoplay muted loop playsinline></video>
 
       <div class="gallery-topbar">
-        <button class="gallery-back" id="closeReviewBtn" aria-label="닫기">
+        <button class="gallery-back" id="closeReviewBtn" aria-label="Close">
           <img src="../assets/img/gallery/back.svg" alt="" />
         </button>
         <div class="gallery-iconrow">
-          <button class="icon-btn-light" aria-label="복원 보기">
+          <button class="icon-btn-light" aria-label="Restore view">
             <img src="../assets/img/gallery/smartview.svg" alt="" />
           </button>
-          <button class="icon-btn-light" aria-label="미리보기">
+          <button class="icon-btn-light" aria-label="Preview">
             <img src="../assets/img/gallery/eye.svg" alt="" />
           </button>
-          <button class="icon-btn-light" aria-label="더보기">
+          <button class="icon-btn-light" aria-label="More">
             <img src="../assets/img/gallery/more.svg" alt="" />
           </button>
         </div>
       </div>
 
-      <p class="gallery-hint">탭하면 인물을 추적해 1:1 영상으로 다시 만들어요</p>
+      <p class="gallery-hint">Tap to track a person and remake it as a 1:1 video</p>
 
       <div class="gallery-bottombar">
-        <button class="gallery-action" aria-label="좋아요">
+        <button class="gallery-action" aria-label="Like">
           <img src="../assets/img/gallery/heart.svg" alt="" />
         </button>
-        <button class="gallery-action" aria-label="편집">
+        <button class="gallery-action" aria-label="Edit">
           <img src="../assets/img/gallery/edit.svg" alt="" />
         </button>
-        <button class="gallery-action gallery-action--primary" id="goAnalyzeBtn" aria-label="보정 시작하기">
+        <button class="gallery-action gallery-action--primary" id="goAnalyzeBtn" aria-label="Start correction">
           <img src="../assets/img/gallery/ai-star.svg" alt="" />
         </button>
-        <button class="gallery-action" aria-label="공유">
+        <button class="gallery-action" aria-label="Share">
           <img src="../assets/img/gallery/share.svg" alt="" />
         </button>
-        <button class="gallery-action" id="retakeBtn" aria-label="삭제하고 다시 찍기">
+        <button class="gallery-action" id="retakeBtn" aria-label="Delete and retake">
           <img src="../assets/img/gallery/trash.svg" alt="" />
         </button>
       </div>
     </section>
 
     <section class="screen ai-screen" id="screen-analyzing" hidden>
-      <h1>촬영본 분석 중</h1>
-      <p class="hint">저장된 영상을 프레임 단위로 다시 읽으며 등장 인물을 찾고 있습니다.</p>
+      <h1>Analyzing your video</h1>
+      <p class="hint">Reading the saved video frame by frame to find the people in it.</p>
       <div class="progress"><div class="progress-fill" id="analyzeProgress"></div></div>
-      <p class="status" id="analyzeStatus">0 / 0 프레임</p>
-      <p class="ai-caption">보정 결과는 예상과 다르게 나올 수 있어요.</p>
+      <p class="status" id="analyzeStatus">0 / 0 frames</p>
+      <p class="ai-caption">Results may differ from what you expect.</p>
     </section>
 
     <section class="screen ai-screen" id="screen-select" hidden>
-      <p class="hint" style="margin-bottom:-4px">따라갈 인물을 탭하세요</p>
+      <p class="hint" style="margin-bottom:-4px">Tap the person to follow</p>
       <div class="choice-wrap">
         <canvas id="choiceCanvas"></canvas>
         <div class="choice-overlay" id="choiceOverlay"></div>
       </div>
-      <p class="ai-caption">보정 결과는 예상과 다르게 나올 수 있어요.</p>
+      <p class="ai-caption">Results may differ from what you expect.</p>
     </section>
 
     <section class="screen ai-screen" id="screen-rendering" hidden>
-      <h1>1:1 정사각형 영상으로 재구성 중</h1>
-      <p class="hint">선택한 인물을 중심으로 매 프레임을 다시 크롭하고 있습니다.</p>
+      <h1>Rebuilding as a 1:1 square video</h1>
+      <p class="hint">Re-cropping every frame around the person you chose.</p>
       <div class="progress"><div class="progress-fill" id="renderProgress"></div></div>
-      <p class="ai-caption">보정 결과는 예상과 다르게 나올 수 있어요.</p>
+      <p class="ai-caption">Results may differ from what you expect.</p>
     </section>
 
     <section class="screen result-screen" id="screen-result" hidden>
       <video id="resultVideo" autoplay muted loop playsinline></video>
       <div class="result-links">
-        <a id="downloadLink" class="text-link" download="my-fancam.webm">다운로드</a>
-        <button class="text-link" id="restartBtn">새로 만들기</button>
+        <a id="downloadLink" class="text-link" download="my-fancam.webm">Download</a>
+        <button class="text-link" id="restartBtn">Start over</button>
       </div>
     </section>
 
@@ -108,7 +112,7 @@
           <span class="grid-line grid-line--h" style="top:66.666%"></span>
         </div>
 
-        <button class="icon-btn camera-back" id="closeCaptureBtn" aria-label="닫기">
+        <button class="icon-btn camera-back" id="closeCaptureBtn" aria-label="Close">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <line x1="6" y1="6" x2="18" y2="18" />
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -141,7 +145,7 @@
               <button class="zoom-opt" data-zoom="5">5</button>
               <button class="zoom-opt" data-zoom="10">10</button>
             </div>
-            <button class="icon-btn" id="gridToggleBtn" aria-label="그리드 표시">
+            <button class="icon-btn" id="gridToggleBtn" aria-label="Show grid">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <line x1="9" y1="3" x2="9" y2="21" />
                 <line x1="15" y1="3" x2="15" y2="21" />
@@ -153,8 +157,8 @@
 
           <div class="shutter-row">
             <span class="gallery-thumb" aria-hidden="true"></span>
-            <button class="shutter-btn" id="recordBtn" aria-label="녹화 시작/종료"></button>
-            <button class="icon-btn" id="switchCamBtn" aria-label="카메라 전환">
+            <button class="shutter-btn" id="recordBtn" aria-label="Start/stop recording"></button>
+            <button class="icon-btn" id="switchCamBtn" aria-label="Switch camera">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 7h11l-3-3" />
                 <path d="M20 17H9l3 3" />
@@ -178,6 +182,8 @@
     import { FaceDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9";
 
     const el = (id) => document.getElementById(id);
+    // Entered from the Camera hub (?autostart=1): leaving the experience goes back to the hub, not this page's intro
+    const cameFromHub = new URLSearchParams(location.search).get("autostart") === "1";
     const MAX_RECORD_MS = 8000;
     const SAMPLE_FPS = 5;
     const OUT_W = 720, OUT_H = 720;   // 결과 영상 크기 (모바일 부담을 줄이려고 1080 → 720)
@@ -195,6 +201,7 @@
     let smoothCrop = null;
 
     function showScreen(id){
+      if (id === "screen-intro" && cameFromHub) { location.href = "camera.html"; return; }
       document.querySelectorAll(".screen").forEach(s => s.hidden = (s.id !== id));
     }
 
@@ -225,7 +232,7 @@
         try {
           stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         } catch (e2) {
-          showError("카메라 권한을 확인해주세요. (" + e2.message + ")", () => showScreen("screen-intro"));
+          showError("Please check camera permission. (" + e2.message + ")", () => showScreen("screen-intro"));
           return false;
         }
       }
@@ -245,8 +252,8 @@
         if (caps && caps.zoom && caps.zoom.max > caps.zoom.min) zoomCaps = caps.zoom;
       } catch (_) {}
       el("capHint").textContent = zoomCaps
-        ? "얼굴이 화면 높이의 1/6 이상 크게 보이면 잘 잡혀요 · 줌으로 가까이 당겨 보세요"
-        : "얼굴이 화면 높이의 1/6 이상 크게 보이게, 가까이서 찍으면 잘 잡혀요";
+        ? "Faces larger than 1/6 of the screen height track best · try pulling in with zoom"
+        : "Faces larger than 1/6 of the screen height track best, so get a little closer";
     }
 
     async function applyZoom(scale){
@@ -462,7 +469,7 @@
             try { detectAndTrack(video, t); } catch (_) { /* 한 프레임 실패는 건너뜀 */ }
             const n = sampleTimestamps.length;
             el("analyzeProgress").style.width = Math.min(100, (t / duration) * 100) + "%";
-            el("analyzeStatus").textContent = n + " / " + total + " 프레임";
+            el("analyzeStatus").textContent = n + " / " + total + " frames";
           }
           if (t >= duration - 0.05) { finish(sampleTimestamps.length > 0); return; }
           schedule();
@@ -490,7 +497,7 @@
         });
         try { detectAndTrack(video, times[i]); } catch (_) {}
         el("analyzeProgress").style.width = ((i + 1) / times.length * 100) + "%";
-        el("analyzeStatus").textContent = (i + 1) + " / " + times.length + " 프레임";
+        el("analyzeStatus").textContent = (i + 1) + " / " + times.length + " frames";
       }
       return sampleTimestamps.length > 0;
     }
@@ -522,11 +529,11 @@
     async function analyzeRecording(){
       showScreen("screen-analyzing");
       el("analyzeProgress").style.width = "0%";
-      el("analyzeStatus").textContent = "얼굴 인식 모델을 불러오는 중…";
-      try { await withTimeout(ensureFaceDetector(), 40000, "모델 로딩 시간이 너무 오래 걸립니다"); }
-      catch (e) { showError("얼굴 인식 모델을 불러오지 못했습니다. (" + e.message + ")", () => showScreen("screen-review")); return; }
+      el("analyzeStatus").textContent = "Loading face detection model…";
+      try { await withTimeout(ensureFaceDetector(), 40000, "Model loading is taking too long"); }
+      catch (e) { showError("Couldn't load the face detection model. (" + e.message + ")", () => showScreen("screen-review")); return; }
 
-      el("analyzeStatus").textContent = "영상을 읽는 중…";
+      el("analyzeStatus").textContent = "Reading the video…";
       const video = el("analysisVideo") || document.createElement("video");
       video.id = "analysisVideo";
       video.muted = true; video.playsInline = true;
@@ -537,13 +544,13 @@
       video.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;";
       video.src = URL.createObjectURL(recordedBlob);
       try {
-        await withTimeout(new Promise((res, rej) => { video.onloadedmetadata = res; video.onerror = () => rej(new Error("영상 형식을 읽을 수 없어요")); }), 12000, "영상을 불러오는 데 시간이 너무 오래 걸립니다");
-      } catch (e) { showError("촬영한 영상을 읽지 못했습니다. (" + e.message + ")", () => showScreen("screen-review")); return; }
+        await withTimeout(new Promise((res, rej) => { video.onloadedmetadata = res; video.onerror = () => rej(new Error("Can't read this video format")); }), 12000, "Loading the video is taking too long");
+      } catch (e) { showError("Couldn't read the recorded video. (" + e.message + ")", () => showScreen("screen-review")); return; }
 
       await warmUpDetector(video);
       let duration = await resolveDuration(video);
       duration = Math.min(duration, MAX_RECORD_MS / 1000 + 1);
-      if (!(duration > 0)) { showError("촬영한 영상의 길이를 확인하지 못했습니다. 다시 촬영해 주세요.", () => showScreen("screen-review")); return; }
+      if (!(duration > 0)) { showError("Couldn't determine the recorded video's length. Please record again.", () => showScreen("screen-review")); return; }
 
       tracks = []; sampleTimestamps = [];
       await seekTo(video, 0);
@@ -553,7 +560,7 @@
         ok = await sampleBySeeking(video, duration);
       }
       if (!ok || sampleTimestamps.length === 0) {
-        showError("영상에서 분석할 프레임을 읽지 못했습니다. 다시 촬영해 주세요.", () => showScreen("screen-review"));
+        showError("Couldn't read any frames to analyze. Please record again.", () => showScreen("screen-review"));
         return;
       }
 
@@ -561,7 +568,7 @@
       tracks = tracks.filter((tr) => tr.samples.length >= minSamples);
 
       if (tracks.length === 0){
-        showError("영상에서 인물을 찾지 못했습니다. 더 가까이, 더 밝은 곳에서 다시 찍어보세요.", () => showScreen("screen-review"));
+        showError("Couldn't find a person in the video. Try again closer and in better light.", () => showScreen("screen-review"));
         return;
       }
       renderFaceChoices(video);
@@ -740,6 +747,11 @@
       tracks = []; sampleTimestamps = []; smoothCrop = null; recordedBlob = null;
       showScreen("screen-intro");
     };
+    // Opened from the Camera hub: skip this page's intro and start right away
+    if (new URLSearchParams(location.search).get("autostart") === "1") {
+      history.replaceState(null, "", location.pathname);
+      el("startBtn").click();
+    }
   </script>
 </body>
 </html>

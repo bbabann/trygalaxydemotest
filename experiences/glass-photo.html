@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Capture | Try Galaxy Demo</title>
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/palmselfie.css" />
+  <style>
+    /* ---------------- 촬영 화면 ---------------- */
+    .cam-screen {
+      position: absolute;
+      inset: 0;
+      display: block;
+      gap: 0;
+      text-align: left;
+      background: #000;
+      overflow: hidden;
+    }
+    .cam-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .glasses-frame {
+      position: absolute;
+      left: -10%;
+      top: 42%;
+      width: 120%;
+      /* 렌즈 아래로 내려가는 안경다리 끝부분 제거 */
+      clip-path: inset(0 0 56% 0);
+      pointer-events: none;
+    }
+
+    /* 오른쪽 안경다리의 파란 촬영 버튼 */
+    .capture-btn {
+      position: absolute;
+      left: 97%;
+      top: 46%;
+      z-index: 3;
+      width: 64px;
+      height: 64px;
+      margin: -32px 0 0 -32px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 128, 255, 0.95) 0%, rgba(74, 128, 255, 0.55) 55%, rgba(74, 128, 255, 0) 72%);
+      cursor: pointer;
+      animation: capture-glow 1.6s ease-in-out infinite;
+    }
+    .capture-btn::after {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+    }
+    @keyframes capture-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(74, 128, 255, 0.6); }
+      50% { box-shadow: 0 0 0 10px rgba(74, 128, 255, 0); }
+    }
+
+    /* 가이드 버블 (레퍼런스와 동일) */
+    .guide-bubble {
+      position: absolute;
+      left: 50%;
+      bottom: 150px;
+      z-index: 3;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 340px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px 12px 12px;
+      margin: 0;
+      border-radius: 999px;
+      border: 1.5px solid #4a80ff;
+      background: #fff;
+      color: #111;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.4;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+    .guide-icon {
+      flex: 0 0 52px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #eaf2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .guide-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    /* 찍힌 이미지 쌓임 */
+    .captured {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 22px;
+      z-index: 3;
+    }
+    .captured-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 84px;
+      padding: 0 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    /* 최근 사진이 맨 앞(왼쪽), 사진 사이 8px 간격, 넘치면 좌우 스크롤 */
+    .slot {
+      flex: 0 0 56px;
+      width: 56px;
+      height: 80px;
+      padding: 0;
+      border: 2px solid #fff;
+      border-radius: 6px;
+      background: #dcdcdc;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+    .slot img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    button.slot {
+      cursor: pointer;
+    }
+
+    .cam-back {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 4;
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    /* ---------------- 결과 화면 (사진 확인 + 저장) ---------------- */
+    .detail-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 72px 24px 40px;
+      box-sizing: border-box;
+      background: #fff;
+      color: #111;
+      text-align: center;
+    }
+    .detail-back {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      border: 0;
+      background: none;
+      font: inherit;
+      font-size: 28px;
+      color: #111;
+      cursor: pointer;
+    }
+    .detail-card {
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 5 / 7;
+      border-radius: 28px;
+      background: #000;
+      overflow: hidden;
+    }
+    .detail-card img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .detail-title {
+      margin: 32px 0 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .detail-save {
+      margin-top: auto;
+      padding: 14px 56px;
+      border: 0;
+      border-radius: 999px;
+      background: #000;
+      color: #fff;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-frame">
+
+    <!-- 촬영 화면: 카메라 뷰 + 안경테 + 촬영 버튼 -->
+    <section class="screen cam-screen" id="screen-cam">
+      <video class="cam-video" id="camVideo" autoplay muted playsinline></video>
+      <img class="glasses-frame" id="glassesFrame" src="../assets/img/glassview/glasses-frame.png" alt="" />
+      <button class="capture-btn" id="captureBtn" type="button" aria-label="Take photo"></button>
+
+      <button class="cam-back" id="camBackBtn" type="button">← Back</button>
+
+      <p class="guide-bubble" id="guideBubble">
+        <span class="guide-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="#4a80ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="14" cy="26" r="7" />
+            <circle cx="34" cy="26" r="7" />
+            <path d="M21 26h6" />
+            <path d="M7 24l-3-6" />
+            <path d="M41 24l3-6" />
+          </svg>
+        </span>
+        <span id="guideText">Press the Camera button on your glasses to take a photo</span>
+      </p>
+
+      <div class="captured">
+        <div class="captured-row" id="capturedRow"></div>
+      </div>
+    </section>
+
+    <!-- 결과 화면: 찍힌 사진 확인 후 저장 -->
+    <section class="screen detail-screen" id="screen-detail" hidden>
+      <button class="detail-back" id="closeDetailBtn" type="button" aria-label="Back">←</button>
+      <div class="detail-card">
+        <img id="detailImage" alt="Captured photo" />
+      </div>
+      <p class="detail-title">Save your photo!</p>
+      <button class="detail-save" id="saveBtn" type="button">Share</button>
+    </section>
+  </div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    const frameEl = el("glassesFrame");
+    const video = el("camVideo");
+    const camScreen = el("screen-cam");
+
+    let stream = null;
+    let photos = [];      // { url, name }
+    let activePhoto = null;
+    let photoSeq = 0;
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach((s) => {
+        s.hidden = s.id !== id;
+      });
+    }
+
+    // ---------- 카메라 ----------
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setGuide("Camera isn't supported in this browser.");
+        return;
+      }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        });
+        video.srcObject = stream;
+        setGuide("Press the Camera button on your glasses to take a photo");
+      } catch (_) {
+        setGuide("Camera access is needed. Please allow camera access.");
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+        stream = null;
+      }
+    }
+
+    function setGuide(text) {
+      el("guideText").textContent = text;
+    }
+
+    // ---------- 촬영 ----------
+    // 후면 카메라 화면만 한 장으로 저장 (안경테는 제외)
+    function capture() {
+      if (!stream || !video.videoWidth) {
+        setGuide("Camera isn't ready yet. Allow camera access, then tap again.");
+        return;
+      }
+
+      const cr = camScreen.getBoundingClientRect();
+      const cw = cr.width, ch = cr.height;
+      const k = 2;
+      const W = Math.round(cw * k), H = Math.round(ch * k);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d");
+
+      // object-fit: cover 와 같은 방식으로 영상 가운데 영역을 잘라서 그림
+      const vw = video.videoWidth, vh = video.videoHeight;
+      const scale = Math.max(cw / vw, ch / vh);
+      const sw = cw / scale, sh = ch / scale;
+      const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, W, H);
+
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        photoSeq += 1;
+        photos.unshift({ url: URL.createObjectURL(blob), name: `glass-photo-${photoSeq}.png` });
+        renderPhotos();
+        // 첫 촬영 후 가이드 버블 숨김 (새로고침하면 다시 표시)
+        el("guideBubble").hidden = true;
+      }, "image/png");
+    }
+
+    function renderPhotos() {
+      const row = el("capturedRow");
+      row.textContent = "";
+      photos.forEach((p) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "slot";
+        btn.setAttribute("aria-label", "Open photo");
+        const img = document.createElement("img");
+        img.src = p.url;
+        img.alt = "";
+        btn.appendChild(img);
+        btn.addEventListener("click", () => openDetail(p));
+        row.appendChild(btn);
+      });
+    }
+
+    // ---------- 결과 화면 ----------
+    function openDetail(photo) {
+      activePhoto = photo;
+      el("detailImage").src = photo.url;
+      showScreen("screen-detail");
+    }
+
+    function closeDetail() {
+      activePhoto = null;
+      showScreen("screen-cam");
+    }
+
+    // 폰에서는 공유 시트(이미지 저장)로, 그 밖에서는 파일 다운로드로 저장
+    async function savePhoto() {
+      if (!activePhoto) return;
+      try {
+        const blob = await (await fetch(activePhoto.url)).blob();
+        const file = new File([blob], activePhoto.name, { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: activePhoto.name });
+          return;
+        }
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+      }
+      const a = document.createElement("a");
+      a.href = activePhoto.url;
+      a.download = activePhoto.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    // ---------- 이벤트 ----------
+    el("captureBtn").addEventListener("click", capture);
+    el("camBackBtn").addEventListener("click", () => {
+      stopCamera();
+      window.location.href = "glassview.html";
+    });
+    el("closeDetailBtn").addEventListener("click", closeDetail);
+    el("saveBtn").addEventListener("click", savePhoto);
+    window.addEventListener("pagehide", stopCamera);
+
+    renderPhotos();
+    startCamera();
+  </script>
+</body>
+</html>

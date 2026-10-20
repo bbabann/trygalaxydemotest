@@ -8,15 +8,19 @@
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/palmselfie.css" />
+  <link rel="stylesheet" href="../assets/css/intro.css" />
 </head>
 <body>
   <div class="app-frame">
     <div class="experience-page">
-      <section class="screen" id="screen-intro">
+      <section class="screen intro-layout" id="screen-intro">
         <h1>Palm Selfie</h1>
-        <p class="hint">후면 카메라(Camera HUD)로 시작해서, 셔터를 누르면 전면 카메라(Selfie HUD)로 전환됩니다.</p>
-        <button class="btn btn-primary" id="startBtn">시작하기</button>
-        <a class="back-link" href="../index.html">← 홈으로 돌아가기</a>
+        <p class="hint">Starts with the rear camera (Camera HUD), and pressing the shutter switches to the front camera (Selfie HUD).</p>
+        <div class="intro-cards intro-cards--single">
+          <div class="intro-card"></div>
+        </div>
+        <button class="btn btn-primary intro-try-lg" id="startBtn" type="button">Try now</button>
+        <a class="back-link" href="../index.html?from=experience">← Back to home</a>
       </section>
     </div>
 
@@ -27,13 +31,13 @@
 
       <canvas class="hand-box-canvas" id="handBoxCanvas"></canvas>
 
-      <p class="hand-hint" id="handHint">손바닥을 화면에 비춰보세요</p>
+      <p class="hand-hint" id="handHint">Show your palm to the camera</p>
 
       <div class="countdown-overlay" id="countdownOverlay" hidden>
         <span class="countdown-number" id="countdownNumber">3</span>
       </div>
 
-      <button class="icon-btn hud-back" id="closeSelfieBtn" aria-label="닫기">
+      <button class="icon-btn hud-back" id="closeSelfieBtn" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="6" y1="6" x2="18" y2="18" />
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -58,7 +62,7 @@
 
       <div class="hud-quick-row">
         <div class="selfie-mode-pill">
-          <button class="selfie-mode-btn" aria-label="그룹 셀피">
+          <button class="selfie-mode-btn" aria-label="Group selfie">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
               <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
@@ -66,14 +70,14 @@
               <path d="M13 14.5c3.2.5 5 2.6 5 5.5" />
             </svg>
           </button>
-          <button class="selfie-mode-btn is-active" aria-label="개인 셀피">
+          <button class="selfie-mode-btn is-active" aria-label="Single selfie">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
             </svg>
           </button>
         </div>
-        <button class="icon-btn" id="moreOptionsBtn" aria-label="더보기">
+        <button class="icon-btn" id="moreOptionsBtn" aria-label="More">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <circle cx="8" cy="7" r="1.6" /><circle cx="16" cy="7" r="1.6" />
             <circle cx="8" cy="12" r="1.6" /><circle cx="16" cy="12" r="1.6" />
@@ -84,7 +88,7 @@
 
       <div class="hud-shutter-row">
         <span class="gallery-thumb" aria-hidden="true"></span>
-        <button class="shutter-btn" id="frontShutterBtn" aria-label="촬영"></button>
+        <button class="shutter-btn" id="frontShutterBtn" aria-label="Capture"></button>
         <span class="icon-btn" aria-hidden="true"></span>
       </div>
 
@@ -98,39 +102,39 @@
 
     <!-- 촬영 결과 — 갤러리 UI -->
     <section class="screen gallery-screen" id="screen-gallery" hidden>
-      <img id="resultImage" alt="촬영된 셀피" />
+      <img id="resultImage" alt="Captured selfie" />
 
       <div class="gallery-topbar">
-        <button class="gallery-back" id="closeGalleryBtn" aria-label="닫기">
+        <button class="gallery-back" id="closeGalleryBtn" aria-label="Close">
           <img src="../assets/img/gallery/back.svg" alt="" />
         </button>
         <div class="gallery-iconrow">
-          <button class="icon-btn-light" aria-label="복원 보기">
+          <button class="icon-btn-light" aria-label="Restore view">
             <img src="../assets/img/gallery/smartview.svg" alt="" />
           </button>
-          <button class="icon-btn-light" aria-label="미리보기">
+          <button class="icon-btn-light" aria-label="Preview">
             <img src="../assets/img/gallery/eye.svg" alt="" />
           </button>
-          <button class="icon-btn-light" aria-label="더보기">
+          <button class="icon-btn-light" aria-label="More">
             <img src="../assets/img/gallery/more.svg" alt="" />
           </button>
         </div>
       </div>
 
       <div class="gallery-bottombar">
-        <button class="gallery-action" aria-label="좋아요">
+        <button class="gallery-action" aria-label="Like">
           <img src="../assets/img/gallery/heart.svg" alt="" />
         </button>
-        <button class="gallery-action" aria-label="편집">
+        <button class="gallery-action" aria-label="Edit">
           <img src="../assets/img/gallery/edit.svg" alt="" />
         </button>
-        <a class="gallery-action gallery-action--primary" id="downloadLink" download="palm-selfie.png" aria-label="다운로드">
+        <a class="gallery-action gallery-action--primary" id="downloadLink" download="palm-selfie.png" aria-label="Download">
           <img src="../assets/img/gallery/ai-star.svg" alt="" />
         </a>
-        <button class="gallery-action" aria-label="공유">
+        <button class="gallery-action" aria-label="Share">
           <img src="../assets/img/gallery/share.svg" alt="" />
         </button>
-        <button class="gallery-action" id="retakeFromGalleryBtn" aria-label="삭제하고 다시 찍기">
+        <button class="gallery-action" id="retakeFromGalleryBtn" aria-label="Delete and retake">
           <img src="../assets/img/gallery/trash.svg" alt="" />
         </button>
       </div>
@@ -141,6 +145,8 @@
     import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9";
 
     const el = (id) => document.getElementById(id);
+    // Entered from the Camera hub (?autostart=1): leaving the experience goes back to the hub, not this page's intro
+    const cameFromHub = new URLSearchParams(location.search).get("autostart") === "1";
     const COUNTDOWN_STEPS = [3, 2, 1];
     const HAND_HOLD_MS = 300; // 이 시간 이상 손이 잡혀있으면 카운트다운 시작
 
@@ -152,6 +158,7 @@
     let resultImageUrl = null;
 
     function showScreen(id){
+      if (id === "screen-intro" && cameFromHub) { location.href = "camera.html"; return; }
       document.querySelectorAll(".screen").forEach(s => s.hidden = (s.id !== id));
     }
 
@@ -166,7 +173,7 @@
         try {
           stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         } catch (e2) {
-          alert("카메라 권한을 확인해주세요. (" + e2.message + ")");
+          alert("Please check camera permission. (" + e2.message + ")");
           showScreen("screen-intro");
           return false;
         }
@@ -307,8 +314,8 @@
             handPresentSince = null;
             clearHandBox();
             el("handHint").textContent = landmarks
-              ? "손바닥 전체가 보이도록 펴서 가까이 대주세요"
-              : "손바닥을 화면에 비춰보세요";
+              ? "Open your whole palm and hold it closer"
+              : "Show your palm to the camera";
             el("handHint").hidden = false;
           }
         }
@@ -327,7 +334,7 @@
       if (countdownTimerId) { clearTimeout(countdownTimerId); countdownTimerId = null; }
       clearHandBox();
       el("countdownOverlay").hidden = true;
-      el("handHint").textContent = "손바닥을 화면에 비춰보세요";
+      el("handHint").textContent = "Show your palm to the camera";
       el("handHint").hidden = false;
     }
 
@@ -397,6 +404,11 @@
       await openCamera("user", el("camVideoFront"));
       startHandWatch();
     };
+    // Opened from the Camera hub: skip this page's intro and start right away
+    if (new URLSearchParams(location.search).get("autostart") === "1") {
+      history.replaceState(null, "", location.pathname);
+      el("startBtn").click();
+    }
   </script>
 </body>
 </html>

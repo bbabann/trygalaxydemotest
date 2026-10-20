@@ -2,30 +2,265 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Try Galaxy Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Galaxy Home | Try Galaxy Demo</title>
   <link rel="stylesheet" as="style" crossorigin
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    html, body { margin: 0; height: 100%; background: #f5f5f5; overflow: hidden; }
+    body { display: flex; align-items: center; justify-content: center; font-family: "Pretendard", "Apple SD Gothic Neo", -apple-system, sans-serif; }
+
+    /* 모바일: 화면 전체를 채움 (폰 크기·비율이 달라도 위젯은 위, 독은 아래에 붙고 가운데가 늘고 줄어듦) */
+    .stage { position: relative; width: 100vw; height: 100dvh; user-select: none; touch-action: pan-y; overflow: hidden; }
+
+    /* 화면 전환은 서서히 사라지고 나타나는 방식 */
+    .slide { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
+    .slide.is-active { opacity: 1; pointer-events: auto; }
+
+    /* 데스크톱: 체험 페이지와 같은 폰 프레임 크기(360×780)로 위쪽 중앙에 고정 */
+    @media (min-width: 400px) {
+      html, body { overflow: auto; }
+      body { align-items: flex-start; }
+      .stage { width: 360px; height: 780px; margin: 40px 0; border: 1px solid #e5e5e5; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); background: #fff; }
+    }
+
+    .screen, .screen *, .screen *::before, .screen *::after { box-sizing: border-box; }
+    .screen { position: absolute; inset: 0; overflow: hidden; color: #fff; }
+    .screen img { display: block; max-width: none; }
+    .abs { position: absolute; display: block; }
+    a.hot { color: inherit; text-decoration: none; outline: none; -webkit-tap-highlight-color: transparent; }
+    a.hot:focus-visible { box-shadow: inset 0 0 0 3px #fff; }
+
+    /* 월페이퍼: 이미지 2장(바탕 + 겹침). 월페이퍼만 바꾸려면 assets/img/homescreen/wallpaper-*.png 를 교체 */
+    .wp, .wp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .dim { position: absolute; inset: 0; z-index: 5; background: #000; opacity: 0.6; pointer-events: none; }
+
+    /* 상태바 */
+    .sb { position: absolute; left: 0; right: 0; top: 6px; height: 22px; z-index: 3; }
+    .sb-time { position: absolute; left: 21px; top: calc(50% - 8px); font-size: 13px; font-weight: 700; line-height: normal; white-space: nowrap; }
+    .sb-bar { position: absolute; background: #fff; border-radius: 0.656px; }
+    .sb-wifi { right: 60px; top: 3px; width: 17px; height: 17px; }
+
+    /* 아래에서부터 쌓이는 홈 구성: 위젯 영역이 남는 높이를 차지함 */
+    .stack { position: absolute; inset: 0; padding-top: 40px; display: flex; flex-direction: column; }
+    .stack-bottom { justify-content: flex-end; pointer-events: none; }
+    .stack-bottom > * { pointer-events: auto; }
+    .slide:not(.is-active) .stack-bottom > * { pointer-events: none; } /* hidden slides must not catch taps */
+    .wrow { flex: 1; min-height: 0; display: flex; align-items: flex-end; padding: 12px 24px; overflow: hidden; }
+    .wcols { display: flex; gap: 24px; height: 165px; width: 100%; flex: none; }
+    .w-weather { position: relative; flex: none; width: 144px; height: 165px; overflow: hidden; color: #fcfcff;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%22144%22 height=%22165%22 viewBox=%220 0 144 165%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22Group%22%3E%3Cpath id=%22Vector%22 d=%22M32.5764 0L111.424 0C122.751 0 126.859 1.17817 131 3.39053C135.141 5.60289 138.391 8.84944 140.606 12.9862C142.821 17.1229 144 21.2262 144 32.5416V132.458C144 143.774 142.821 147.877 140.606 152.014C138.391 156.151 135.141 159.397 131 161.609C126.859 163.822 122.751 165 111.424 165H32.5764C21.2489 165 17.1413 163.822 13.0001 161.609C8.8589 159.397 5.60888 156.151 3.39416 152.014C1.17943 147.877 0 143.774 0 132.458L0 32.5416C0 21.2262 1.17943 17.1229 3.39416 12.9862C5.60888 8.84944 8.8589 5.60289 13.0001 3.39053C17.1413 1.17817 21.2489 0 32.5764 0Z%22 fill=%22white%22/%3E%3C/g%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%22144%22 height=%22165%22 viewBox=%220 0 144 165%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22Group%22%3E%3Cpath id=%22Vector%22 d=%22M32.5764 0L111.424 0C122.751 0 126.859 1.17817 131 3.39053C135.141 5.60289 138.391 8.84944 140.606 12.9862C142.821 17.1229 144 21.2262 144 32.5416V132.458C144 143.774 142.821 147.877 140.606 152.014C138.391 156.151 135.141 159.397 131 161.609C126.859 163.822 122.751 165 111.424 165H32.5764C21.2489 165 17.1413 163.822 13.0001 161.609C8.8589 159.397 5.60888 156.151 3.39416 152.014C1.17943 147.877 0 143.774 0 132.458L0 32.5416C0 21.2262 1.17943 17.1229 3.39416 12.9862C5.60888 8.84944 8.8589 5.60289 13.0001 3.39053C17.1413 1.17817 21.2489 0 32.5764 0Z%22 fill=%22white%22/%3E%3C/g%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; }
+    .w-text { position: absolute; left: 14px; top: 73px; width: 103px; height: 78px; }
+    .w-text p { position: absolute; left: 0; right: 0; margin: 0; line-height: normal; font-size: 12px; white-space: pre; text-align: left; }
+    .w-deg { top: 0; font-size: 21px !important; } .w-d1 { top: 26px; } .w-d2 { top: 44px; } .w-loc { top: 62px; opacity: 0.7; }
+    .wcol { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0; }
+    .w-oobe { position: relative; height: 68px; flex: none; }
+    .w-oobe > img { inset: 0; width: 100%; height: 100%; border-radius: 999px; }
+    .oobe-t { position: absolute; left: 50%; top: 50%; width: 113px; transform: translate(-50%, -50%); text-align: center; font-size: 15.1px; font-weight: 600; color: #000; }
+    .w-health { position: relative; height: 68px; flex: none; }
+    .h-blur { inset: 4.41% 0; border-radius: 999px; background: rgba(242,242,242,0.18); -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+    .h-bg { inset: 0; border-radius: 1014px; background: rgba(252,252,255,0.75); border: 0.5px solid rgba(252,252,255,0.2); }
+    .hw-t { position: absolute; font-size: 11px; font-weight: 600; line-height: normal; color: #010102; white-space: nowrap; }
+
+    /* 구글 검색창 */
+    .gbar { flex: none; height: 112px; padding: 16px 24px; display: flex; align-items: center; }
+    .gbar-in { width: 100%; background: #fff; opacity: 0.9; border-radius: 33px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .g-logo { width: 28.064px; height: 28.636px; margin: 1.68px 1.57px 1.68px 2.37px; }
+    .g-act { display: flex; align-items: center; gap: 12px; }
+    .g-voice { width: 17.529px; height: 25.432px; margin: 3.3px 7.2px; } .g-lens { width: 32px; height: 32px; }
+
+    /* 앱 아이콘 줄 / 독 */
+    .approw { position: relative; flex: none; padding: 8px 16px; height: 112px; }
+    .approw-in { display: flex; justify-content: space-between; }
+    .app { position: relative; flex: 0 1 80px; width: 80px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 12px; }
+    .app-ic { width: 60px; height: 60px; }
+    .app-ic.masked { -webkit-mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22App icons%22%3E%3Cpath id=%22container%22 fill-rule=%22evenodd%22 clip-rule=%22evenodd%22 d=%22M7.02833 6.66667C12.5312 1.125 20.7796 0 30 0C39.2208 0 47.4692 1.125 52.9721 6.66667C57.3579 11.0833 60 18.3058 60 30C60 41.6942 57.3575 48.9167 52.9713 53.3338C47.4683 58.8746 39.2204 60 30 60C20.7804 60 12.5321 58.8746 7.02917 53.3338C2.6425 48.9167 1.43051e-06 41.6942 1.43051e-06 30C1.43051e-06 18.3058 2.64208 11.0837 7.02833 6.66667Z%22 fill=%22url%28%23paint0_linear_393_14615%29%22/%3E%3Cpath id=%22Vector 921%22 d=%22M6.30197 6.21037L53 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Cpath id=%22Vector 922%22 d=%22M52.9191 6.21037L6.2211 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Ccircle id=%22Ellipse 1496%22 cx=%2230%22 cy=%2230%22 r=%2220.5%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3C/g%3E%3Cdefs%3E%3ClinearGradient id=%22paint0_linear_393_14615%22 x1=%2230%22 y1=%220%22 x2=%2230%22 y2=%2260%22 gradientUnits=%22userSpaceOnUse%22%3E%3Cstop stop-color=%22white%22/%3E%3Cstop offset=%221%22 stop-color=%22%23868E9C%22/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg preserveAspectRatio=%22none%22 overflow=%22visible%22 style=%22display: block%3B%22 width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 fill=%22none%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg id=%22App icons%22%3E%3Cpath id=%22container%22 fill-rule=%22evenodd%22 clip-rule=%22evenodd%22 d=%22M7.02833 6.66667C12.5312 1.125 20.7796 0 30 0C39.2208 0 47.4692 1.125 52.9721 6.66667C57.3579 11.0833 60 18.3058 60 30C60 41.6942 57.3575 48.9167 52.9713 53.3338C47.4683 58.8746 39.2204 60 30 60C20.7804 60 12.5321 58.8746 7.02917 53.3338C2.6425 48.9167 1.43051e-06 41.6942 1.43051e-06 30C1.43051e-06 18.3058 2.64208 11.0837 7.02833 6.66667Z%22 fill=%22url%28%23paint0_linear_393_14615%29%22/%3E%3Cpath id=%22Vector 921%22 d=%22M6.30197 6.21037L53 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Cpath id=%22Vector 922%22 d=%22M52.9191 6.21037L6.2211 52.9084%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3Ccircle id=%22Ellipse 1496%22 cx=%2230%22 cy=%2230%22 r=%2220.5%22 stroke=%22%23404040%22 stroke-opacity=%220.2%22/%3E%3C/g%3E%3Cdefs%3E%3ClinearGradient id=%22paint0_linear_393_14615%22 x1=%2230%22 y1=%220%22 x2=%2230%22 y2=%2260%22 gradientUnits=%22userSpaceOnUse%22%3E%3Cstop stop-color=%22white%22/%3E%3Cstop offset=%221%22 stop-color=%22%23868E9C%22/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+    .app-lab { font-size: 12px; line-height: normal; text-align: center; color: #fff; }
+    .ring { position: absolute; left: 50%; top: 0; width: 60px; height: 60px; margin-left: -30px; pointer-events: none; }
+    .ring img { inset: 0; width: 100%; height: 100%; }
+    .dock { flex: none; padding: 16px; display: flex; justify-content: space-between; }
+
+    /* 페이지 점 / 내비게이션 바 */
+    .pind { flex: none; height: 49px; padding: 16px 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+    .pind > * { width: 17px; height: 17px; display: block; position: relative; }
+    .pi-un i { position: absolute; left: 29.41%; right: 29.41%; height: 8.82%; min-height: 1.5px; background: #fff; opacity: 0.65; border-radius: 0.5px; }
+    .pi-un i:nth-child(1) { top: 32.35%; } .pi-un i:nth-child(2) { top: 58.82%; }
+    .pi-dot img { position: absolute; inset: 29.41%; width: 41.18%; height: 41.18%; }
+    .nav { flex: none; height: 54px; padding: 12px 68px 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .nav img { width: 22px; height: 22px; }
+
+    /* 튜토리얼(1·2번) */
+    .tut-text { position: absolute; z-index: 6; font-size: 16px; font-weight: 600; line-height: normal; white-space: nowrap; pointer-events: none; }
+    .swipe-arrow { position: absolute; z-index: 6; right: 20px; top: 66px; width: 52px; height: 30px; pointer-events: none; }
+    .tap-hand { position: absolute; z-index: 6; left: 23px; top: 4px; width: 157px; height: 100px; object-fit: cover; pointer-events: none; }
+    .tut-tap { left: 23px; top: -58px; }
+    /* slide 2: the two tappable apps sit above the dim layer so they look highlighted */
+    .slide[data-step="2"] .approw-in .app:nth-child(-n+2) { position: relative; z-index: 6; }
+    .approw .tut-text { position: absolute; }
+
+    /* 4번: Only on Galaxy */
+    .s4group { position: absolute; left: 0; top: 100px; width: 100%; height: 455px; transform-origin: 0 0; z-index: 2; }
+    .only-title { position: absolute; left: 0; right: 0; top: 37px; margin: 0; transform: translateY(-50%); text-align: center; font-size: 24px; font-weight: 700; white-space: nowrap; z-index: 3; }
+    .cards { position: absolute; left: 0; right: 0; top: 84px; padding: 0 18px; }
+    .crow { display: flex; gap: 10px; height: 110px; margin-bottom: 9px; }
+    .crow-last { margin-bottom: 0; }
+    .card { position: relative; flex: 1; min-width: 0; height: 110px; background: #f3f3f3; border-radius: 12px; overflow: hidden; display: block; }
+    .card-t { position: absolute; left: 12px; top: 12px; font-size: 13px; font-weight: 600; line-height: normal; color: #000; opacity: 0.8; white-space: nowrap; }
+    .shot { position: absolute; box-shadow: 4.183px 4.183px 10.459px rgba(0,0,0,0.25); }
+    .shot img { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  </style>
 </head>
 <body>
-  <div class="app-frame">
-    <header>
-      <h1>Try Galaxy Demo</h1>
-      <p>아래 카드를 눌러 다양한 체험을 시작해보세요.</p>
-    </header>
+  <div class="stage" id="stage">
 
-    <main>
-      <div class="card-grid" id="card-grid">
-        <!-- 카드는 assets/js/experiences.js 에서 동적으로 렌더링됩니다 -->
-      </div>
-    </main>
+<div class="slide is-active" data-step="1"><div class="screen"><div class="wp"><img src="assets/img/homescreen/wallpaper-base.png" alt="" /><img src="assets/img/homescreen/wallpaper-overlay.png" alt="" /></div><div class="sb">
+  <span class="sb-time">2:01</span>
+  <img class="abs" src="assets/img/homescreen/status-battery.svg" alt="" style="inset:27.27% 5.83% 9.09% 88.33%" />
+  <img class="abs" src="assets/img/homescreen/status-rssi.svg" alt="" style="inset:13.64% 11.94% 13.64% 83.33%" />
+  <i class="sb-bar" style="inset:57.57% 15.29% 27.28% 84.32%"></i><i class="sb-bar" style="inset:50% 14.55% 27.27% 85.05%"></i>
+  <i class="sb-bar" style="inset:42.42% 13.81% 27.28% 85.79%"></i><i class="sb-bar" style="inset:34.85% 13.07% 27.28% 86.53%"></i>
+  <img class="abs sb-wifi" src="assets/img/homescreen/status-wifi.svg" alt="" />
+</div><div class="stack"><div class="wrow"><div class="wcols"><div class="w-weather">
+  <img class="abs" src="assets/img/homescreen/w-rect.svg" alt="" style="inset:0 -2.94%" /><img class="abs" src="assets/img/homescreen/w-group1.svg" alt="" style="inset:0" /><img class="abs" src="assets/img/homescreen/w-bg.svg" alt="" style="inset:0" />
+  <div class="w-text"><p class="w-deg">24°</p><p class="w-d1">Partly cloudy</p><p class="w-d2">↑24° / ↓20°</p><p class="w-loc">Current Location</p></div>
+  <img class="abs" src="assets/img/homescreen/w-sun.svg" alt="" style="inset:7.88% 9.03% 60.61% 50.69%" /></div><div class="wcol"><div class="w-oobe"><img class="abs" src="assets/img/homescreen/oobe.png" alt="" /><span class="oobe-t">Keep in mind</span></div><div class="w-health"><span class="abs h-blur"></span><span class="abs h-bg"></span>
+  <img class="abs" src="assets/img/homescreen/h-stroke1.svg" alt="" style="inset:35.09% 64.5% 33.12% 16.91%" /><img class="abs" src="assets/img/homescreen/h-stroke3.svg" alt="" style="inset:28.57% 61.43% 26.6% 13.83%" /><img class="abs" src="assets/img/homescreen/h-stroke5.svg" alt="" style="inset:22.06% 58.36% 20.08% 10.76%" />
+  <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="assets/img/homescreen/h-stroke2.svg" alt="" style="inset:-9.76% -7.58% -9.76% -7.58%" /></span><span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="assets/img/homescreen/h-stroke4.svg" alt="" style="inset:-6.55% -5.49% -6.55% -5.49%" /></span><span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="assets/img/homescreen/h-stroke6.svg" alt="" style="inset:-4.92% -4.3% -4.92% -4.3%" /></span>
+  <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="assets/img/homescreen/h-stroke7.svg" alt="" style="inset:-9.91% -7.7% -9.91% -7.7%" /></span><span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="assets/img/homescreen/h-stroke8.svg" alt="" style="inset:-6.65% -5.57% -6.65% -5.57%" /></span><span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="assets/img/homescreen/h-stroke9.svg" alt="" style="inset:-5% -4.37% -5% -4.37%" /></span>
+  <span class="hw-t" style="inset:14.71% 17.63% 63.24% 61.54%">4,350</span><span class="hw-t" style="inset:38.97% 29.43% 38.97% 61.54%">76</span><span class="hw-t" style="inset:63.24% 24.57% 14.71% 61.54%">458</span>
+  <img class="abs" src="assets/img/homescreen/h-step.svg" alt="" style="inset:15.44% 41.24% 63.97% 49.04%" /><img class="abs" src="assets/img/homescreen/h-step-i.svg" alt="" style="inset:20.77% 43.77% 69.33% 51.56%" />
+  <img class="abs" src="assets/img/homescreen/h-act.svg" alt="" style="inset:39.71% 41.24% 39.71% 49.04%" /><img class="abs" src="assets/img/homescreen/h-act-i.svg" alt="" style="inset:45.56% 44.02% 45.59% 51.8%" />
+  <img class="abs" src="assets/img/homescreen/h-cal.svg" alt="" style="inset:63.97% 41.24% 15.44% 49.04%" /><img class="abs" src="assets/img/homescreen/h-cal-i.svg" alt="" style="inset:69.4% 44.2% 20.93% 51.99%" /></div></div></div></div><div class="gbar"><div class="gbar-in"><img class="g-logo" src="assets/img/homescreen/google.svg" alt="" /><div class="g-act"><img class="g-voice" src="assets/img/homescreen/voice.png" alt="" /><img class="g-lens" src="assets/img/homescreen/lens.png" alt="" /></div></div></div><div class="approw"><div class="approw-in"><a class="app hot" href="experiences/exp4.html" aria-label="Smart Switch"><img class="app-ic masked" src="assets/img/homescreen/smartswitch.png" alt="" /><span class="app-lab">Smart<br />Switch</span></a><a class="app hot" href="experiences/exp4.html?s=qs" aria-label="Quick Share"><img class="app-ic masked" src="assets/img/homescreen/quickshare.png" alt="" /><span class="app-lab">Quick Share</span></a><div class="app"><img class="app-ic masked" src="assets/img/homescreen/health.png" alt="" /><span class="app-lab">Health</span></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/settings.png" alt="" /><span class="app-lab">Settings</span></div></div></div><div class="pind"><span class="pi-un"><i></i><i></i></span><img src="assets/img/homescreen/page-home.svg" alt="" /><span class="pi-dot"><img src="assets/img/homescreen/page-dot.svg" alt="" /></span></div><div class="dock"><div class="app"><img class="app-ic masked" src="assets/img/homescreen/phone.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/messages.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/photos.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/camera.png" alt="" /></div></div><div class="nav"><img src="assets/img/homescreen/nav-recent.svg" alt="" /><img src="assets/img/homescreen/nav-home.svg" alt="" /><img src="assets/img/homescreen/nav-back.svg" alt="" /></div></div><div class="dim"></div><div class="tut-text" style="left:145px;top:60px">Swipe Homescreen<br />Explore Contents </div><img class="swipe-arrow" src="assets/img/homescreen/swipe-arrow.svg" alt="" /></div></div>
 
-    <footer>
-      <p>&copy; 2026 Try Galaxy Demo Prototype</p>
-    </footer>
+<div class="slide" data-step="2"><div class="screen"><div class="wp"><img src="assets/img/homescreen/wallpaper-base.png" alt="" /><img src="assets/img/homescreen/wallpaper-overlay.png" alt="" /></div><div class="sb">
+  <span class="sb-time">2:01</span>
+  <img class="abs" src="assets/img/homescreen/status-battery.svg" alt="" style="inset:27.27% 5.83% 9.09% 88.33%" />
+  <img class="abs" src="assets/img/homescreen/status-rssi.svg" alt="" style="inset:13.64% 11.94% 13.64% 83.33%" />
+  <i class="sb-bar" style="inset:57.57% 15.29% 27.28% 84.32%"></i><i class="sb-bar" style="inset:50% 14.55% 27.27% 85.05%"></i>
+  <i class="sb-bar" style="inset:42.42% 13.81% 27.28% 85.79%"></i><i class="sb-bar" style="inset:34.85% 13.07% 27.28% 86.53%"></i>
+  <img class="abs sb-wifi" src="assets/img/homescreen/status-wifi.svg" alt="" />
+</div><div class="stack"><div class="wrow"><div class="wcols"><div class="w-weather">
+  <img class="abs" src="assets/img/homescreen/w-rect.svg" alt="" style="inset:0 -2.94%" /><img class="abs" src="assets/img/homescreen/w-group1.svg" alt="" style="inset:0" /><img class="abs" src="assets/img/homescreen/w-bg.svg" alt="" style="inset:0" />
+  <div class="w-text"><p class="w-deg">24°</p><p class="w-d1">Partly cloudy</p><p class="w-d2">↑24° / ↓20°</p><p class="w-loc">Current Location</p></div>
+  <img class="abs" src="assets/img/homescreen/w-sun.svg" alt="" style="inset:7.88% 9.03% 60.61% 50.69%" /></div><div class="wcol"><div class="w-oobe"><img class="abs" src="assets/img/homescreen/oobe.png" alt="" /><span class="oobe-t">Keep in mind</span></div><div class="w-health"><span class="abs h-blur"></span><span class="abs h-bg"></span>
+  <img class="abs" src="assets/img/homescreen/h-stroke1.svg" alt="" style="inset:35.09% 64.5% 33.12% 16.91%" /><img class="abs" src="assets/img/homescreen/h-stroke3.svg" alt="" style="inset:28.57% 61.43% 26.6% 13.83%" /><img class="abs" src="assets/img/homescreen/h-stroke5.svg" alt="" style="inset:22.06% 58.36% 20.08% 10.76%" />
+  <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="assets/img/homescreen/h-stroke2.svg" alt="" style="inset:-9.76% -7.58% -9.76% -7.58%" /></span><span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="assets/img/homescreen/h-stroke4.svg" alt="" style="inset:-6.55% -5.49% -6.55% -5.49%" /></span><span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="assets/img/homescreen/h-stroke6.svg" alt="" style="inset:-4.92% -4.3% -4.92% -4.3%" /></span>
+  <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="assets/img/homescreen/h-stroke7.svg" alt="" style="inset:-9.91% -7.7% -9.91% -7.7%" /></span><span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="assets/img/homescreen/h-stroke8.svg" alt="" style="inset:-6.65% -5.57% -6.65% -5.57%" /></span><span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="assets/img/homescreen/h-stroke9.svg" alt="" style="inset:-5% -4.37% -5% -4.37%" /></span>
+  <span class="hw-t" style="inset:14.71% 17.63% 63.24% 61.54%">4,350</span><span class="hw-t" style="inset:38.97% 29.43% 38.97% 61.54%">76</span><span class="hw-t" style="inset:63.24% 24.57% 14.71% 61.54%">458</span>
+  <img class="abs" src="assets/img/homescreen/h-step.svg" alt="" style="inset:15.44% 41.24% 63.97% 49.04%" /><img class="abs" src="assets/img/homescreen/h-step-i.svg" alt="" style="inset:20.77% 43.77% 69.33% 51.56%" />
+  <img class="abs" src="assets/img/homescreen/h-act.svg" alt="" style="inset:39.71% 41.24% 39.71% 49.04%" /><img class="abs" src="assets/img/homescreen/h-act-i.svg" alt="" style="inset:45.56% 44.02% 45.59% 51.8%" />
+  <img class="abs" src="assets/img/homescreen/h-cal.svg" alt="" style="inset:63.97% 41.24% 15.44% 49.04%" /><img class="abs" src="assets/img/homescreen/h-cal-i.svg" alt="" style="inset:69.4% 44.2% 20.93% 51.99%" /></div></div></div></div><div class="gbar"><div class="gbar-in"><img class="g-logo" src="assets/img/homescreen/google.svg" alt="" /><div class="g-act"><img class="g-voice" src="assets/img/homescreen/voice.png" alt="" /><img class="g-lens" src="assets/img/homescreen/lens.png" alt="" /></div></div></div><div class="approw"><div class="tut-text tut-tap">Tap icons</div><div class="approw-in"><a class="app hot" href="experiences/exp4.html" aria-label="Smart Switch"><img class="app-ic masked" src="assets/img/homescreen/smartswitch.png" alt="" /><span class="app-lab">Smart<br />Switch</span></a><a class="app hot" href="experiences/exp4.html?s=qs" aria-label="Quick Share"><img class="app-ic masked" src="assets/img/homescreen/quickshare.png" alt="" /><span class="app-lab">Quick Share</span></a><div class="app"><img class="app-ic masked" src="assets/img/homescreen/health.png" alt="" /><span class="app-lab">Health</span></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/settings.png" alt="" /><span class="app-lab">Settings</span></div></div></div><div class="pind"><span class="pi-un"><i></i><i></i></span><img src="assets/img/homescreen/page-home.svg" alt="" /><span class="pi-dot"><img src="assets/img/homescreen/page-dot.svg" alt="" /></span></div><div class="dock"><div class="app"><img class="app-ic masked" src="assets/img/homescreen/phone.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/messages.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/photos.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/camera.png" alt="" /></div></div><div class="nav"><img src="assets/img/homescreen/nav-recent.svg" alt="" /><img src="assets/img/homescreen/nav-home.svg" alt="" /><img src="assets/img/homescreen/nav-back.svg" alt="" /></div></div><div class="dim"></div></div></div>
+
+<div class="slide" data-step="3"><div class="screen"><div class="wp"><img src="assets/img/homescreen/wallpaper-base.png" alt="" /><img src="assets/img/homescreen/wallpaper-overlay.png" alt="" /></div><div class="sb">
+  <span class="sb-time">2:01</span>
+  <img class="abs" src="assets/img/homescreen/status-battery.svg" alt="" style="inset:27.27% 5.83% 9.09% 88.33%" />
+  <img class="abs" src="assets/img/homescreen/status-rssi.svg" alt="" style="inset:13.64% 11.94% 13.64% 83.33%" />
+  <i class="sb-bar" style="inset:57.57% 15.29% 27.28% 84.32%"></i><i class="sb-bar" style="inset:50% 14.55% 27.27% 85.05%"></i>
+  <i class="sb-bar" style="inset:42.42% 13.81% 27.28% 85.79%"></i><i class="sb-bar" style="inset:34.85% 13.07% 27.28% 86.53%"></i>
+  <img class="abs sb-wifi" src="assets/img/homescreen/status-wifi.svg" alt="" />
+</div><div class="stack"><div class="wrow"><div class="wcols"><div class="w-weather">
+  <img class="abs" src="assets/img/homescreen/w-rect.svg" alt="" style="inset:0 -2.94%" /><img class="abs" src="assets/img/homescreen/w-group1.svg" alt="" style="inset:0" /><img class="abs" src="assets/img/homescreen/w-bg.svg" alt="" style="inset:0" />
+  <div class="w-text"><p class="w-deg">24°</p><p class="w-d1">Partly cloudy</p><p class="w-d2">↑24° / ↓20°</p><p class="w-loc">Current Location</p></div>
+  <img class="abs" src="assets/img/homescreen/w-sun.svg" alt="" style="inset:7.88% 9.03% 60.61% 50.69%" /></div><div class="wcol"><div class="w-oobe"><img class="abs" src="assets/img/homescreen/oobe.png" alt="" /><span class="oobe-t">Keep in mind</span></div><div class="w-health"><span class="abs h-blur"></span><span class="abs h-bg"></span>
+  <img class="abs" src="assets/img/homescreen/h-stroke1.svg" alt="" style="inset:35.09% 64.5% 33.12% 16.91%" /><img class="abs" src="assets/img/homescreen/h-stroke3.svg" alt="" style="inset:28.57% 61.43% 26.6% 13.83%" /><img class="abs" src="assets/img/homescreen/h-stroke5.svg" alt="" style="inset:22.06% 58.36% 20.08% 10.76%" />
+  <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="assets/img/homescreen/h-stroke2.svg" alt="" style="inset:-9.76% -7.58% -9.76% -7.58%" /></span><span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="assets/img/homescreen/h-stroke4.svg" alt="" style="inset:-6.55% -5.49% -6.55% -5.49%" /></span><span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="assets/img/homescreen/h-stroke6.svg" alt="" style="inset:-4.92% -4.3% -4.92% -4.3%" /></span>
+  <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="assets/img/homescreen/h-stroke7.svg" alt="" style="inset:-9.91% -7.7% -9.91% -7.7%" /></span><span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="assets/img/homescreen/h-stroke8.svg" alt="" style="inset:-6.65% -5.57% -6.65% -5.57%" /></span><span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="assets/img/homescreen/h-stroke9.svg" alt="" style="inset:-5% -4.37% -5% -4.37%" /></span>
+  <span class="hw-t" style="inset:14.71% 17.63% 63.24% 61.54%">4,350</span><span class="hw-t" style="inset:38.97% 29.43% 38.97% 61.54%">76</span><span class="hw-t" style="inset:63.24% 24.57% 14.71% 61.54%">458</span>
+  <img class="abs" src="assets/img/homescreen/h-step.svg" alt="" style="inset:15.44% 41.24% 63.97% 49.04%" /><img class="abs" src="assets/img/homescreen/h-step-i.svg" alt="" style="inset:20.77% 43.77% 69.33% 51.56%" />
+  <img class="abs" src="assets/img/homescreen/h-act.svg" alt="" style="inset:39.71% 41.24% 39.71% 49.04%" /><img class="abs" src="assets/img/homescreen/h-act-i.svg" alt="" style="inset:45.56% 44.02% 45.59% 51.8%" />
+  <img class="abs" src="assets/img/homescreen/h-cal.svg" alt="" style="inset:63.97% 41.24% 15.44% 49.04%" /><img class="abs" src="assets/img/homescreen/h-cal-i.svg" alt="" style="inset:69.4% 44.2% 20.93% 51.99%" /></div></div></div></div><div class="gbar"><div class="gbar-in"><img class="g-logo" src="assets/img/homescreen/google.svg" alt="" /><div class="g-act"><img class="g-voice" src="assets/img/homescreen/voice.png" alt="" /><img class="g-lens" src="assets/img/homescreen/lens.png" alt="" /></div></div></div><div class="approw"><div class="approw-in"><a class="app hot" href="experiences/exp4.html" aria-label="Smart Switch"><img class="app-ic masked" src="assets/img/homescreen/smartswitch.png" alt="" /><span class="app-lab">Smart<br />Switch</span></a><a class="app hot" href="experiences/exp4.html?s=qs" aria-label="Quick Share"><img class="app-ic masked" src="assets/img/homescreen/quickshare.png" alt="" /><span class="app-lab">Quick Share</span></a><div class="app"><img class="app-ic masked" src="assets/img/homescreen/health.png" alt="" /><span class="app-lab">Health</span></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/settings.png" alt="" /><span class="app-lab">Settings</span></div></div></div><div class="pind"><span class="pi-un"><i></i><i></i></span><img src="assets/img/homescreen/page-home.svg" alt="" /><span class="pi-dot"><img src="assets/img/homescreen/page-dot.svg" alt="" /></span></div><div class="dock"><div class="app"><img class="app-ic masked" src="assets/img/homescreen/phone.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/messages.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/photos.png" alt="" /></div><a class="app hot" href="experiences/camera.html" aria-label="Camera"><img class="app-ic masked" src="assets/img/homescreen/camera.png" alt="" /></a></div><div class="nav"><img src="assets/img/homescreen/nav-recent.svg" alt="" /><img src="assets/img/homescreen/nav-home.svg" alt="" /><img src="assets/img/homescreen/nav-back.svg" alt="" /></div></div></div></div>
+
+<div class="slide" data-step="4"><div class="screen"><div class="wp"><img src="assets/img/homescreen/wallpaper-base.png" alt="" /><img src="assets/img/homescreen/wallpaper-overlay.png" alt="" /></div><div class="sb">
+  <span class="sb-time">2:01</span>
+  <img class="abs" src="assets/img/homescreen/status-battery.svg" alt="" style="inset:27.27% 5.83% 9.09% 88.33%" />
+  <img class="abs" src="assets/img/homescreen/status-rssi.svg" alt="" style="inset:13.64% 11.94% 13.64% 83.33%" />
+  <i class="sb-bar" style="inset:57.57% 15.29% 27.28% 84.32%"></i><i class="sb-bar" style="inset:50% 14.55% 27.27% 85.05%"></i>
+  <i class="sb-bar" style="inset:42.42% 13.81% 27.28% 85.79%"></i><i class="sb-bar" style="inset:34.85% 13.07% 27.28% 86.53%"></i>
+  <img class="abs sb-wifi" src="assets/img/homescreen/status-wifi.svg" alt="" />
+</div><div class="s4group" id="s4group"><h2 class="only-title">Explore Galaxy</h2><div class="cards"><div class="crow"><a class="card hot" href="experiences/exp3.html" aria-label="Privacy Display"><span class="card-t">Privacy Display</span><span class="shot" style="left:43.12px;top:49.52px;width:70.62px;height:153.36px;border-radius:6.343px;background:linear-gradient(to bottom,#1ba2fd,#dbffc8 45.192%,#dbffc8)"></span><img class="abs" src="assets/img/homescreen/card-phone-frame.png" alt="" style="left:27.96px;top:38px;width:102.07px;height:177px" /></a><a class="card hot" href="experiences/exp1.html" aria-label="My Fancam"><span class="card-t">My Fancam</span><span class="shot" style="left:42.55px;top:45.52px;width:70.62px;height:153.36px;border-radius:6.343px;background:linear-gradient(to bottom,#1ba2fd,#dbffc8 45.192%,#dbffc8)"></span><img class="abs" src="assets/img/homescreen/card-phone-frame.png" alt="" style="left:27px;top:33px;width:102.07px;height:177px" /></a></div><div class="crow"><a class="card hot" href="experiences/exp2.html" aria-label="Palm Selfie"><span class="card-t">Palm Selfie</span><span class="shot" style="left:42.55px;top:45.52px;width:70.62px;height:153.36px;border-radius:6.343px;background:linear-gradient(to bottom,#1ba2fd,#dbffc8 45.192%,#dbffc8)"></span><img class="abs" src="assets/img/homescreen/card-phone-frame.png" alt="" style="left:27.4px;top:34px;width:102.07px;height:177px" /></a><a class="card hot" href="experiences/exp6.html" aria-label="Super Steady"><span class="card-t">Super Steady</span><span class="shot" style="left:42.55px;top:45.52px;width:70.62px;height:153.36px;border-radius:6.343px;background:linear-gradient(to bottom,#1ba2fd,#dbffc8 45.192%,#dbffc8)"></span><img class="abs" src="assets/img/homescreen/card-phone-frame.png" alt="" style="left:27.4px;top:34px;width:102.07px;height:177px" /></a></div><div class="crow crow-last"><a class="card hot" href="experiences/exp5.html" aria-label="Watch &amp; Ring"><span class="card-t">Watch &amp; Ring</span><span class="abs" style="left:0;top:0;width:143px;height:100%"><span class="abs" style="left:0;top:41px;width:109px;height:109px;overflow:hidden"><img class="abs" src="assets/img/homescreen/card-watch.png" alt="" style="height:100%;left:-25%;top:0;width:150%" /></span><span class="abs" style="left:99px;top:43px;width:44px;height:45px;overflow:hidden"><img class="abs" src="assets/img/homescreen/card-ring.png" alt="" style="height:100%;left:-27.01%;top:0;width:154.02%" /></span></span></a><a class="card hot" href="experiences/glassview.html" aria-label="Smart Glasses"><span class="card-t">Smart Glasses</span><span class="abs" style="left:5.5px;top:39px;width:139px;height:67px;overflow:hidden"><img class="abs" src="assets/img/homescreen/card-glasses.png" alt="" style="height:427.8%;left:-51.4%;top:-175.93%;width:207.22%" /></span></a></div></div></div><div class="stack stack-bottom"><div class="pind"><span class="pi-un"><i></i><i></i></span><img src="assets/img/homescreen/page4-home.svg" alt="" /><span class="pi-dot"><img src="assets/img/homescreen/page4-dot.svg" alt="" /></span></div><div class="dock"><div class="app"><img class="app-ic masked" src="assets/img/homescreen/phone.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/messages.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/photos.png" alt="" /></div><div class="app"><img class="app-ic masked" src="assets/img/homescreen/camera.png" alt="" /></div></div><div class="nav"><img src="assets/img/homescreen/nav-recent.svg" alt="" /><img src="assets/img/homescreen/nav-home.svg" alt="" /><img src="assets/img/homescreen/nav-back.svg" alt="" /></div></div></div></div>
   </div>
 
-  <script src="assets/js/experiences.js"></script>
+  <script>
+    const stage = document.getElementById("stage");
+    // 4번 화면: 제목+카드 묶음(원래 높이 455px)이 독과 겹치지 않도록, 화면 높이가 모자라면 비율을 줄임
+    const s4 = document.getElementById("s4group");
+    function fitCards() {
+      const H = stage.clientHeight;
+      const BOTTOM = 195 + 16;                       // 페이지 점 + 독 + 내비게이션 + 여백
+      const s = Math.max(0.5, Math.min(1, (H - BOTTOM - 56) / 455));
+      s4.style.transform = "scale(" + s.toFixed(4) + ")";
+      s4.style.width = (100 / s).toFixed(2) + "%";
+      s4.style.top = Math.min(100, H - BOTTOM - 455 * s) + "px";
+    }
+    fitCards();
+    window.addEventListener("resize", fitCards);
+    const slides = Array.from(stage.querySelectorAll(".slide"));
+    // 체험 페이지에서 "홈으로 돌아가기"로 왔을 때는 튜토리얼 생략 (새로고침은 항상 재생)
+    function cameFromExperience() {
+      // 체험 페이지의 홈 링크에 붙은 ?from=experience 표시를 읽고, 주소에서는 바로 지움
+      if (new URLSearchParams(location.search).has("from")) {
+        history.replaceState(null, "", location.pathname);
+        return true;
+      }
+      try {
+        const nav = performance.getEntriesByType("navigation")[0];
+        if (nav && nav.type === "reload") return false;
+        const ref = new URL(document.referrer);
+        return ref.origin === location.origin && ref.pathname.includes("/experiences/");
+      } catch (_) {
+        return false;
+      }
+    }
+
+    let step = cameFromExperience() ? 3 : 1;
+
+    // 튜토리얼 화면은 일정 시간이 지나면 자동으로 다음 화면으로 넘어감
+    const TUTORIAL_MS = 3000;
+    let tutorialTimer = null;
+
+    function go(n) {
+      clearTimeout(tutorialTimer);
+      step = Math.min(slides.length, Math.max(1, n));
+      slides.forEach((s) => s.classList.toggle("is-active", Number(s.dataset.step) === step));
+      if (step === 1 || step === 2) {
+        tutorialTimer = setTimeout(() => go(step === 1 ? 3 : step + 1), TUTORIAL_MS); // slide 2 (Tap icons guide) is skipped
+      }
+    }
+
+    go(step);
+
+    // 1·2단계: 탭 또는 스와이프하면 다음 화면
+    // 3단계: 좌우 스와이프하면 체험 인덱스(4번 화면)로 이동
+    // 4단계: 좌우 스와이프하면 홈(3번 화면)으로 복귀
+    let startX = null;
+    stage.addEventListener("pointerdown", (e) => { startX = e.clientX; });
+    stage.addEventListener("pointerup", (e) => {
+      if (startX === null) return;
+      const dx = e.clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 40) {
+        if (step === 1 || step === 2) go(step === 1 ? 3 : step + 1);
+        else if (step === 3) go(4);
+        else if (step === 4) go(3);
+      }
+    });
+
+    stage.addEventListener("click", (e) => {
+      if (e.target.closest(".hot")) return;
+      if (step === 1 || step === 2) go(step === 1 ? 3 : step + 1);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") {
+        if (step === 1 || step === 2) go(step === 1 ? 3 : step + 1);
+        else if (step === 3) go(4);
+        else if (step === 4) go(3);
+      }
+      if (e.key === "ArrowLeft") {
+        if (step === 4) go(3);
+        else if (step === 3) go(4);
+      }
+    });
+  </script>
 </body>
 </html>

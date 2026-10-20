@@ -1,0 +1,81 @@
+/* Shared "intro" layout for experiences with branches (Camera, Smart Glasses).
+   Single-experience intros use: title, copy, one "Try now" button, "Back to home".
+   Branching intros use: title, copy, one option per branch with its own "Try now", "Back to home". */
+
+.intro-options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.intro-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  text-align: left;
+}
+
+.intro-option-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.intro-option-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.intro-option-desc {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.intro-option .btn {
+  display: inline-block;
+  flex: none;
+  padding: 8px 14px;
+  text-decoration: none;
+}
+
+/* Tight vertical rhythm for every intro: title -> copy 8px, copy -> action 16px, action -> "Back to home" 8px */
+#screen-intro { gap: 0; }
+#screen-intro h1 { margin: 0 0 8px; }
+#screen-intro .hint { margin: 0 0 16px; }
+#screen-intro .back-link { margin-top: 8px; }
+
+/* ---------- Card-based intro: title, copy, card(s), "Back to home"; "Try now" sits bottom-right of each card ---------- */
+.intro-layout { flex: 1; justify-content: center; align-items: stretch; padding: 32px 16px 24px; }
+.intro-layout h1, .intro-layout .hint { align-self: center; text-align: center; }
+.intro-cards { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.intro-cards--single { flex: 0 1 320px; min-height: 160px; }
+.intro-cards--stack { flex: 1; min-height: 0; }
+.intro-cards--single .intro-card, .intro-cards--stack .intro-card { flex: 1; min-height: 0; }
+.intro-card {
+  position: relative; display: block; width: 100%; padding: 0; border: 0;
+  border-radius: var(--radius); overflow: hidden; background: #9a9a9a; /* gray box when there is no image */
+  color: #fff; font: inherit; text-align: left; text-decoration: none; cursor: pointer;
+}
+.intro-card::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 55%); }
+.intro-card-label { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 15px; font-weight: 700; line-height: 1.3; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+.intro-card-label small { display: block; margin-top: 2px; font-size: 12px; font-weight: 500; opacity: 0.9; }
+.intro-card-try { position: absolute; right: 12px; bottom: 12px; z-index: 2; padding: 6px 12px; border-radius: 999px; background: #fff; color: #111; font-size: 12px; font-weight: 600; }
+#screen-intro .intro-cards + .back-link { margin-top: 16px; align-self: center; }
+/* Single-content intro: big centered "Try now" under the card */
+.intro-try-lg { align-self: center; margin-top: 16px; padding: 14px 40px; font-size: 16px; }
+#screen-intro .intro-try-lg + .back-link { margin-top: 12px; align-self: center; }
+.intro-card { cursor: default; }
+a.intro-card { cursor: pointer; }
+/* "Back to home": smaller and fainter everywhere */
+.back-link { padding: 6px 14px; font-size: 13px; color: #a3a3a3; border-color: #ececec; }
+.back-link:hover { color: var(--foreground); border-color: var(--border); }
+
+/* intro screens carry their own 16px side padding (same as Smart Glasses) */
+.experience-page { padding-left: 0; padding-right: 0; }

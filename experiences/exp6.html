@@ -8,20 +8,24 @@
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/supersteady.css" />
+  <link rel="stylesheet" href="../assets/css/intro.css" />
 </head>
 <body>
   <div class="app-frame">
     <div class="experience-page">
-      <section class="screen" id="screen-intro">
+      <section class="screen intro-layout" id="screen-intro">
         <h1>Super Steady</h1>
-        <p class="hint">같은 장면을 촬영한 두 영상이 위아래 폰에서 동시에 재생됩니다. 화면을 탭하면 Others와 Galaxy가 번갈아 크게 보여, 흔들림 보정 차이를 바로 비교할 수 있습니다.</p>
-        <button class="btn btn-primary" id="startBtn">시작하기</button>
-        <a class="back-link" href="../index.html">← 홈으로 돌아가기</a>
+        <p class="hint">Two videos of the same scene play on the top and bottom phones. Tap the screen to switch between Others and Galaxy and compare the stabilization.</p>
+        <div class="intro-cards intro-cards--single">
+          <div class="intro-card"></div>
+        </div>
+        <button class="btn btn-primary intro-try-lg" id="startBtn" type="button">Try now</button>
+        <a class="back-link" href="../index.html?from=experience">← Back to home</a>
       </section>
     </div>
 
     <section class="screen splitview-screen" id="screen-splitview" hidden>
-      <button class="splitview-back" id="closeSplitBtn" aria-label="닫기">
+      <button class="splitview-back" id="closeSplitBtn" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="6" y1="6" x2="18" y2="18" />
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -36,7 +40,7 @@
               <div class="ss-screen">
                 <div class="ss-notch"></div>
                 <video id="videoTop" src="../assets/video/supersteady/others.mov" muted playsinline webkit-playsinline preload="auto"></video>
-                <p class="ss-missing" id="missingTop" hidden>영상 파일이 없습니다<br />assets/video/supersteady/others.mov</p>
+                <p class="ss-missing" id="missingTop" hidden>Video file not found<br />assets/video/supersteady/others.mov</p>
               </div>
             </div>
             <p class="ss-caption">Others</p>
@@ -49,23 +53,26 @@
               <div class="ss-screen">
                 <div class="ss-notch"></div>
                 <video id="videoBottom" src="../assets/video/supersteady/galaxy.mov" muted playsinline webkit-playsinline preload="auto"></video>
-                <p class="ss-missing" id="missingBottom" hidden>영상 파일이 없습니다<br />assets/video/supersteady/galaxy.mov</p>
+                <p class="ss-missing" id="missingBottom" hidden>Video file not found<br />assets/video/supersteady/galaxy.mov</p>
               </div>
             </div>
             <p class="ss-caption">Galaxy</p>
           </div>
-          <span class="ss-hint">화면을 탭해보세요</span>
+          <span class="ss-hint">Tap the screen</span>
         </div>
 
-        <div class="ss-resize-handle" id="ssResizeHandle" aria-label="두 화면 비율 드래그로 조절"></div>
+        <div class="ss-resize-handle" id="ssResizeHandle" aria-label="Drag to resize the two screens"></div>
       </div>
     </section>
   </div>
 
   <script>
     const el = (id) => document.getElementById(id);
+    // Entered from the Camera hub (?autostart=1): leaving the experience goes back to the hub, not this page's intro
+    const cameFromHub = new URLSearchParams(location.search).get("autostart") === "1";
 
     function showScreen(id){
+      if (id === "screen-intro" && cameFromHub) { location.href = "camera.html"; return; }
       document.querySelectorAll(".screen").forEach(s => s.hidden = (s.id !== id));
     }
 
@@ -194,6 +201,11 @@
       resizeHandle.addEventListener("pointermove", onMove);
       resizeHandle.addEventListener("pointerup", onUp);
     });
+    // Opened from the Camera hub: skip this page's intro and start right away
+    if (new URLSearchParams(location.search).get("autostart") === "1") {
+      history.replaceState(null, "", location.pathname);
+      el("startBtn").click();
+    }
   </script>
 </body>
 </html>

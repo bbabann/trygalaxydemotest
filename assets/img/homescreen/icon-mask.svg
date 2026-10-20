@@ -1,0 +1,14 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="App icons">
+<path id="container" fill-rule="evenodd" clip-rule="evenodd" d="M7.02833 6.66667C12.5312 1.125 20.7796 0 30 0C39.2208 0 47.4692 1.125 52.9721 6.66667C57.3579 11.0833 60 18.3058 60 30C60 41.6942 57.3575 48.9167 52.9713 53.3338C47.4683 58.8746 39.2204 60 30 60C20.7804 60 12.5321 58.8746 7.02917 53.3338C2.6425 48.9167 1.43051e-06 41.6942 1.43051e-06 30C1.43051e-06 18.3058 2.64208 11.0837 7.02833 6.66667Z" fill="url(#paint0_linear_393_14615)"/>
+<path id="Vector 921" d="M6.30197 6.21037L53 52.9084" stroke="#404040" stroke-opacity="0.2"/>
+<path id="Vector 922" d="M52.9191 6.21037L6.2211 52.9084" stroke="#404040" stroke-opacity="0.2"/>
+<circle id="Ellipse 1496" cx="30" cy="30" r="20.5" stroke="#404040" stroke-opacity="0.2"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_393_14615" x1="30" y1="0" x2="30" y2="60" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="1" stop-color="#868E9C"/>
+</linearGradient>
+</defs>
+</svg>

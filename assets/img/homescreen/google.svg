@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="28.0636" height="28.6364" viewBox="0 0 28.0636 28.6364" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Google">
+<path id="Fill 1" fill-rule="evenodd" clip-rule="evenodd" d="M28.0636 14.6364C28.0636 13.4591 27.9681 12.6 27.7614 11.7091H14.3182V17.0227H22.209C22.05 18.3432 21.1909 20.3318 19.2818 21.6681L19.255 21.846L23.5055 25.1388L23.8 25.1682C26.5045 22.6704 28.0636 18.9954 28.0636 14.6364" fill="#4285F4"/>
+<g id="Group 5">
+<mask id="mask0_393_14621" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="1" y="17" width="23" height="12">
+<path id="Clip 4" fill-rule="evenodd" clip-rule="evenodd" d="M1.52721 17.15H23.8V28.6364H1.52721V17.15Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_393_14621)">
+<path id="Fill 3" fill-rule="evenodd" clip-rule="evenodd" d="M14.3182 28.6364C18.1841 28.6364 21.4294 27.3636 23.8 25.1682L19.2818 21.6681C18.0727 22.5113 16.4499 23.0999 14.3182 23.0999C10.5319 23.0999 7.31823 20.6023 6.1727 17.15L6.00475 17.1643L1.58501 20.5847L1.52721 20.7454C3.88176 25.4226 8.7181 28.6364 14.3182 28.6364" fill="#34A853"/>
+</g>
+</g>
+<g id="Group 8">
+<mask id="mask1_393_14621" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="7" width="7" height="14">
+<path id="Clip 7" fill-rule="evenodd" clip-rule="evenodd" d="M0 7.82118H6.17267V20.7454H0V7.82118Z" fill="white"/>
+</mask>
+<g mask="url(#mask1_393_14621)">
+<path id="Fill 6" fill-rule="evenodd" clip-rule="evenodd" d="M6.17267 17.15C5.87037 16.2591 5.69545 15.3045 5.69545 14.3182C5.69545 13.3317 5.87037 12.3772 6.15679 11.4864L6.14873 11.2966L1.67363 7.82118L1.52723 7.89084C0.556851 9.83178 -1.4054e-05 12.0114 -1.4054e-05 14.3182C-1.4054e-05 16.625 0.556851 18.8044 1.52723 20.7454L6.17267 17.15" fill="#FBBC05"/>
+</g>
+</g>
+<path id="Fill 9" fill-rule="evenodd" clip-rule="evenodd" d="M14.3182 5.53632C17.0068 5.53632 18.8204 6.69769 19.8545 7.66817L23.8954 3.72271C21.4136 1.41589 18.1841 0 14.3182 0C8.7181 0 3.88176 3.21358 1.52721 7.89083L6.15677 11.4863C7.31823 8.03409 10.5319 5.53632 14.3182 5.53632" fill="#EB4335"/>
+</g>
+</svg>

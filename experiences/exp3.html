@@ -8,125 +8,53 @@
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/static/pretendard.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/privacydisplay.css" />
+  <link rel="stylesheet" href="../assets/css/homescreen.css" />
+  <link rel="stylesheet" href="../assets/css/intro.css" />
 </head>
 <body>
   <div class="app-frame">
     <div class="experience-page">
-      <section class="screen" id="screen-intro">
+      <section class="screen intro-layout" id="screen-intro">
         <h1>Privacy Display</h1>
-        <p class="hint">화면을 좌우로 기울이면, 기울인 각도에 따라 화면이 점점 검게 가려집니다. 정면에서는 그대로 보이고, 45도 이상 기울이면 거의 보이지 않습니다.</p>
-        <button class="btn btn-primary" id="startBtn">시작하기</button>
-        <a class="back-link" href="../index.html">← 홈으로 돌아가기</a>
+        <p class="hint">Tilt the screen left or right and it gradually darkens with the angle. It looks normal from the front and is almost invisible beyond 45°.</p>
+        <div class="intro-cards intro-cards--single">
+          <div class="intro-card"></div>
+        </div>
+        <button class="btn btn-primary intro-try-lg" id="startBtn" type="button">Try now</button>
+        <a class="back-link" href="../index.html?from=experience">← Back to home</a>
       </section>
     </div>
 
     <section class="screen privacy-screen" id="screen-display" hidden>
-      <div class="wallpaper" aria-hidden="true"></div>
-
-      <div class="home-stage">
-        <div class="widget-area">
-        <div class="widget-weather">
-          <img class="abs" src="../assets/img/privacy/w-rect.svg" alt="" style="inset:0 -2.94%" />
-          <img class="abs" src="../assets/img/privacy/w-group1.svg" alt="" style="inset:0" />
-          <img class="abs" src="../assets/img/privacy/w-bg.svg" alt="" style="inset:0" />
-          <div class="w-text">
-            <p class="w-deg">24°</p>
-            <p class="w-desc w-desc1">Partly cloudy</p>
-            <p class="w-desc w-desc2">↑24° / ↓20°</p>
-            <p class="w-desc w-loc">Current Location</p>
-          </div>
-          <img class="abs" src="../assets/img/privacy/w-sun.svg" alt="" style="inset:7.88% 9.03% 60.61% 50.69%" />
-        </div>
-        <div class="widget-col">
-          <div class="widget-oobe">
-            <img class="abs" src="../assets/img/privacy/oobe.png" alt="" />
-            <span class="oobe-text">Keep in mind</span>
-          </div>
-        <div class="widget-health">
-          <span class="abs h-blur"></span>
-          <span class="abs h-bg"></span>
-          <img class="abs" src="../assets/img/privacy/h-stroke1.svg" alt="" style="inset:35.09% 64.5% 33.12% 16.91%" />
-          <img class="abs" src="../assets/img/privacy/h-stroke3.svg" alt="" style="inset:28.57% 61.43% 26.6% 13.83%" />
-          <img class="abs" src="../assets/img/privacy/h-stroke5.svg" alt="" style="inset:22.06% 58.36% 20.08% 10.76%" />
-          <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="../assets/img/privacy/h-stroke2.svg" alt="" style="inset:-9.76% -7.58% -9.76% -7.58%" /></span>
-          <span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="../assets/img/privacy/h-stroke4.svg" alt="" style="inset:-6.55% -5.49% -6.55% -5.49%" /></span>
-          <span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="../assets/img/privacy/h-stroke6.svg" alt="" style="inset:-4.92% -4.3% -4.92% -4.3%" /></span>
-          <span class="abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="abs" src="../assets/img/privacy/h-stroke7.svg" alt="" style="inset:-9.91% -7.7% -9.91% -7.7%" /></span>
-          <span class="abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="abs" src="../assets/img/privacy/h-stroke8.svg" alt="" style="inset:-6.65% -5.57% -6.65% -5.57%" /></span>
-          <span class="abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="abs" src="../assets/img/privacy/h-stroke9.svg" alt="" style="inset:-5% -4.37% -5% -4.37%" /></span>
-          <span class="hw-t" style="inset:14.71% 17.63% 63.24% 61.54%">4,350</span>
-          <span class="hw-t" style="inset:38.97% 29.43% 38.97% 61.54%">76</span>
-          <span class="hw-t" style="inset:63.24% 24.57% 14.71% 61.54%">458</span>
-          <img class="abs" src="../assets/img/privacy/h-step.svg" alt="" style="inset:15.44% 41.24% 63.97% 49.04%" />
-          <img class="abs" src="../assets/img/privacy/h-step-i.svg" alt="" style="inset:20.77% 43.77% 69.33% 51.56%" />
-          <img class="abs" src="../assets/img/privacy/h-act.svg" alt="" style="inset:39.71% 41.24% 39.71% 49.04%" />
-          <img class="abs" src="../assets/img/privacy/h-act-i.svg" alt="" style="inset:45.56% 44.02% 45.59% 51.8%" />
-          <img class="abs" src="../assets/img/privacy/h-cal.svg" alt="" style="inset:63.97% 41.24% 15.44% 49.04%" />
-          <img class="abs" src="../assets/img/privacy/h-cal-i.svg" alt="" style="inset:69.4% 44.2% 20.93% 51.99%" />
-        </div>
-        </div>
-        </div>
-
-        <div class="google-bar">
-          <div class="google-bar-inner">
-            <img class="g-logo" src="../assets/img/privacy/google.svg" alt="" />
-            <div class="g-actions">
-              <img class="g-voice" src="../assets/img/privacy/voice.png" alt="" />
-              <img class="g-lens" src="../assets/img/privacy/lens.png" alt="" />
-            </div>
-          </div>
-        </div>
-
-        <div class="app-row">
-          <div class="app-container">
-            <img class="app-ic" src="../assets/img/privacy/smartswitch.png" alt="" />
-            <span class="app-label">Smart<br />Switch</span>
-          </div>
-          <div class="app-container">
-            <img class="app-ic" src="../assets/img/privacy/themes.png" alt="" />
-            <span class="app-label">Themes</span>
-          </div>
-          <div class="app-container">
-            <img class="app-ic" src="../assets/img/privacy/health.png" alt="" />
-            <span class="app-label">Health</span>
-          </div>
-          <div class="app-container">
-            <img class="app-ic" src="../assets/img/privacy/settings.png" alt="" />
-            <span class="app-label">Settings</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="home-bottom">
-      <div class="page-indicator">
-        <span class="pi-unsel"><i></i><i></i></span>
-        <img src="../assets/img/privacy/page-home.svg" alt="" />
-        <span class="pi-dot"><img src="../assets/img/privacy/page-dot.svg" alt="" /></span>
-      </div>
-
-      <div class="dock">
-        <img src="../assets/img/privacy/phone.png" alt="" />
-        <img src="../assets/img/privacy/messages.png" alt="" />
-        <img src="../assets/img/privacy/photos.png" alt="" />
-        <img src="../assets/img/privacy/camera.png" alt="" />
-      </div>
-
-      <div class="bottom-nav">
-        <img src="../assets/img/privacy/nav-recent.svg" alt="" />
-        <img src="../assets/img/privacy/nav-home.svg" alt="" />
-        <img src="../assets/img/privacy/nav-back.svg" alt="" />
-      </div>
-      </div>
+      <!-- Galaxy home screen (same as the site home); styles in assets/css/homescreen.css -->
+      <div class="hs"><div class="hs-wp"><img src="../assets/img/homescreen/wallpaper-base.png" alt="" /><img src="../assets/img/homescreen/wallpaper-overlay.png" alt="" /></div><div class="hs-sb">
+  <span class="hs-sb-time">2:01</span>
+  <img class="hs-abs" src="../assets/img/homescreen/status-battery.svg" alt="" style="inset:27.27% 5.83% 9.09% 88.33%" />
+  <img class="hs-abs" src="../assets/img/homescreen/status-rssi.svg" alt="" style="inset:13.64% 11.94% 13.64% 83.33%" />
+  <i class="hs-sb-bar" style="inset:57.57% 15.29% 27.28% 84.32%"></i><i class="hs-sb-bar" style="inset:50% 14.55% 27.27% 85.05%"></i>
+  <i class="hs-sb-bar" style="inset:42.42% 13.81% 27.28% 85.79%"></i><i class="hs-sb-bar" style="inset:34.85% 13.07% 27.28% 86.53%"></i>
+  <img class="hs-abs hs-sb-wifi" src="../assets/img/homescreen/status-wifi.svg" alt="" />
+</div><div class="hs-stack"><div class="hs-wrow"><div class="hs-wcols"><div class="hs-w-weather">
+  <img class="hs-abs" src="../assets/img/homescreen/w-rect.svg" alt="" style="inset:0 -2.94%" /><img class="hs-abs" src="../assets/img/homescreen/w-group1.svg" alt="" style="inset:0" /><img class="hs-abs" src="../assets/img/homescreen/w-bg.svg" alt="" style="inset:0" />
+  <div class="hs-w-text"><p class="hs-w-deg">24°</p><p class="hs-w-d1">Partly cloudy</p><p class="hs-w-d2">↑24° / ↓20°</p><p class="hs-w-loc">Current Location</p></div>
+  <img class="hs-abs" src="../assets/img/homescreen/w-sun.svg" alt="" style="inset:7.88% 9.03% 60.61% 50.69%" /></div><div class="hs-wcol"><div class="hs-w-oobe"><img class="hs-abs" src="../assets/img/homescreen/oobe.png" alt="" /><span class="hs-oobe-t">Keep in mind</span></div><div class="hs-w-health"><span class="hs-abs hs-h-blur"></span><span class="hs-abs hs-h-bg"></span>
+  <img class="hs-abs" src="../assets/img/homescreen/h-stroke1.svg" alt="" style="inset:35.09% 64.5% 33.12% 16.91%" /><img class="hs-abs" src="../assets/img/homescreen/h-stroke3.svg" alt="" style="inset:28.57% 61.43% 26.6% 13.83%" /><img class="hs-abs" src="../assets/img/homescreen/h-stroke5.svg" alt="" style="inset:22.06% 58.36% 20.08% 10.76%" />
+  <span class="hs-abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="hs-abs" src="../assets/img/homescreen/h-stroke2.svg" alt="" style="inset:-9.76% -7.58% -9.76% -7.58%" /></span><span class="hs-abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="hs-abs" src="../assets/img/homescreen/h-stroke4.svg" alt="" style="inset:-6.55% -5.49% -6.55% -5.49%" /></span><span class="hs-abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="hs-abs" src="../assets/img/homescreen/h-stroke6.svg" alt="" style="inset:-4.92% -4.3% -4.92% -4.3%" /></span>
+  <span class="hs-abs" style="inset:37.71% 65.72% 35.73% 18.13%"><img class="hs-abs" src="../assets/img/homescreen/h-stroke7.svg" alt="" style="inset:-9.91% -7.7% -9.91% -7.7%" /></span><span class="hs-abs" style="inset:31.19% 62.65% 29.22% 15.06%"><img class="hs-abs" src="../assets/img/homescreen/h-stroke8.svg" alt="" style="inset:-6.65% -5.57% -6.65% -5.57%" /></span><span class="hs-abs" style="inset:24.68% 59.58% 22.7% 11.99%"><img class="hs-abs" src="../assets/img/homescreen/h-stroke9.svg" alt="" style="inset:-5% -4.37% -5% -4.37%" /></span>
+  <span class="hs-hw-t" style="inset:14.71% 17.63% 63.24% 61.54%">4,350</span><span class="hs-hw-t" style="inset:38.97% 29.43% 38.97% 61.54%">76</span><span class="hs-hw-t" style="inset:63.24% 24.57% 14.71% 61.54%">458</span>
+  <img class="hs-abs" src="../assets/img/homescreen/h-step.svg" alt="" style="inset:15.44% 41.24% 63.97% 49.04%" /><img class="hs-abs" src="../assets/img/homescreen/h-step-i.svg" alt="" style="inset:20.77% 43.77% 69.33% 51.56%" />
+  <img class="hs-abs" src="../assets/img/homescreen/h-act.svg" alt="" style="inset:39.71% 41.24% 39.71% 49.04%" /><img class="hs-abs" src="../assets/img/homescreen/h-act-i.svg" alt="" style="inset:45.56% 44.02% 45.59% 51.8%" />
+  <img class="hs-abs" src="../assets/img/homescreen/h-cal.svg" alt="" style="inset:63.97% 41.24% 15.44% 49.04%" /><img class="hs-abs" src="../assets/img/homescreen/h-cal-i.svg" alt="" style="inset:69.4% 44.2% 20.93% 51.99%" /></div></div></div></div><div class="hs-gbar"><div class="hs-gbar-in"><img class="hs-g-logo" src="../assets/img/homescreen/google.svg" alt="" /><div class="hs-g-act"><img class="hs-g-voice" src="../assets/img/homescreen/voice.png" alt="" /><img class="hs-g-lens" src="../assets/img/homescreen/lens.png" alt="" /></div></div></div><div class="hs-approw"><div class="hs-approw-in"><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/smartswitch.png" alt="" /><span class="hs-app-lab">Smart<br />Switch</span></div><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/quickshare.png" alt="" /><span class="hs-app-lab">Quick Share</span></div><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/health.png" alt="" /><span class="hs-app-lab">Health</span></div><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/settings.png" alt="" /><span class="hs-app-lab">Settings</span></div></div></div><div class="hs-pind"><span class="hs-pi-un"><i></i><i></i></span><img src="../assets/img/homescreen/page-home.svg" alt="" /><span class="hs-pi-dot"><img src="../assets/img/homescreen/page-dot.svg" alt="" /></span></div><div class="hs-dock"><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/phone.png" alt="" /></div><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/messages.png" alt="" /></div><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/photos.png" alt="" /></div><div class="hs-app"><img class="hs-app-ic hs-masked" src="../assets/img/homescreen/camera.png" alt="" /></div></div><div class="hs-nav"><img src="../assets/img/homescreen/nav-recent.svg" alt="" /><img src="../assets/img/homescreen/nav-home.svg" alt="" /><img src="../assets/img/homescreen/nav-back.svg" alt="" /></div></div></div>
 
       <div class="privacy-overlay" id="privacyOverlay"></div>
 
-      <button class="home-back" id="closeDisplayBtn" aria-label="닫기">
+      <button class="home-back" id="closeDisplayBtn" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
       </button>
 
       <div class="tilt-debug" id="tiltDebug">0°</div>
 
-      <button class="btn btn-primary permission-card" id="permissionBtn" hidden>기울기 센서 사용 허용</button>
+      <button class="btn btn-primary permission-card" id="permissionBtn" hidden>Allow tilt sensor</button>
     </section>
   </div>
 
@@ -187,10 +115,10 @@
               el("permissionBtn").hidden = true;
               startTiltWatch();
             } else {
-              el("permissionBtn").textContent = "센서 권한이 거부되었습니다";
+              el("permissionBtn").textContent = "Sensor permission was denied";
             }
           } catch (err) {
-            el("permissionBtn").textContent = "센서를 사용할 수 없습니다";
+            el("permissionBtn").textContent = "Sensor unavailable";
           }
         };
       } else {
