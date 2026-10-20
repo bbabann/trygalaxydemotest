@@ -102,12 +102,11 @@
 
 .ss-pill {
   display: inline-block;
-  padding: 4px 14px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.41rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   background: var(--muted);
   color: var(--muted-foreground);
   transition: background-color 400ms ease, color 400ms ease;
@@ -117,6 +116,18 @@
   background: var(--foreground);
   color: var(--background);
 }
+
+.ss-device-name {
+  margin-top: -0.4rem; /* sits directly under the pill */
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  transition: color 400ms ease;
+}
+
+.ss-device-name:empty { display: none; } /* G2G / Quick Share have no name line */
+.panel[data-role="active"] .ss-device-name { color: var(--foreground); }
+.ss-intro-device .ss-device-name { visibility: hidden; } /* hidden in intro, like the pill */
 
 .ss-device {
   position: relative;
@@ -133,7 +144,7 @@
 /* 기기 프레임 이미지(투명 PNG) 위에 화면 캡처를 구멍 위치에 맞춰 깔아줌 */
 .ss-frame {
   position: relative;
-  height: 243px;
+  height: 268px;
   aspect-ratio: 2201 / 4509;
 }
 
@@ -162,7 +173,7 @@
   top: 1.87%;
   width: 91.16%;
   height: 96.19%;
-  border-radius: 8.2% / 3.8%; /* 프레임 구멍의 둥근 모서리 */
+  border-radius: 10.5% / 4.9%; /* 프레임 구멍의 둥근 모서리 */
 }
 
 .ss-frame.galaxy .ss-screen {
@@ -180,18 +191,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.ss-caption {
-  font-size: 0.72rem;
-  color: var(--muted-foreground);
-  letter-spacing: 0.02em;
-  margin: 0;
-}
-
-.ss-caption b {
-  color: var(--foreground);
-  font-weight: 700;
+  border-radius: inherit; /* 프레임 구멍의 둥근 모서리를 이미지에도 적용해 프레임 밖으로 나가는 부분을 잘라냄 */
 }
 
 .splitview-back {
@@ -248,16 +248,21 @@
   opacity: 0;
 }
 
-/* ---------------- 연결 완료 뒤 계속 유지되는 데이터 연결 표시 ---------------- */
+/* ---------------- 연결 완료 뒤 계속 유지되는 두 기기 연결 표시 (둥근 점선 + 순차 점등) ---------------- */
 
 .ss-connector {
+  --c: #aeb4bd;
   position: absolute;
   left: 50%;
   top: 66.667%;
   z-index: 6;
-  width: 4px;
-  height: 84px;
+  width: 12px;
+  height: 88px;
   transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   transition: top 620ms cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
 }
@@ -266,43 +271,68 @@
   transition: none;
 }
 
-.ss-connector-line {
+/* 전송 중(iOS 9 → Galaxy 11 전까지)에는 파란색으로 */
+.ss-connector.is-transferring {
+  --c: #2f6fed;
+}
+
+.ssc-dots {
+  flex: 1;
   width: 100%;
-  height: 100%;
-  overflow: visible;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.ss-connector-line line {
-  stroke: var(--muted-foreground);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 7 7;
-  animation: ss-connector-flow 0.9s linear infinite;
-  transition: stroke 300ms ease;
+.ssc-dots i {
+  display: block;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: var(--c);
+  opacity: 0.55;
+  transition: background-color 300ms ease;
+  /* 대기: 위에서 아래로 물결치듯 은은하게 숨 쉼 */
+  animation: ssc-breathe 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.16s);
 }
 
-/* iOS 화면 9(전송 중)부터 갤럭시 화면 11(전송 완료) 전까지: 점선이 파란색으로, 아이콘이 떨어지는 연출 */
-.ss-connector.is-transferring .ss-connector-line line {
-  stroke: #2f6fed;
+/* 처음 연결되는 순간: 한 번 차례로 켜졌다가 대기 상태로 이어짐 */
+.ss-connector.is-connecting .ssc-dots i {
+  animation:
+    ssc-connect 0.7s ease-out calc(var(--i) * 0.07s) 1 both,
+    ssc-breathe 2.6s ease-in-out calc(1.3s + var(--i) * 0.16s) infinite;
 }
 
-@keyframes ss-connector-flow {
-  to { stroke-dashoffset: -28; }
+/* 전송 중: 보내는 쪽 → 받는 쪽으로 빛이 이어달리듯 점등 */
+.ss-connector.is-transferring .ssc-dots i {
+  animation: ssc-chase 1.2s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.1s);
 }
 
-.ss-falling-icon {
-  position: absolute;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  margin-left: -4.5px;
-  border-radius: 2.5px;
-  background: #2f6fed;
-  opacity: 0;
+@keyframes ssc-breathe {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes ssc-connect {
+  0% { opacity: 0.2; transform: scale(1); background: #2f6fed; }
+  45% { opacity: 1; transform: scale(1.8); background: #2f6fed; }
+  100% { opacity: 0.55; transform: scale(1); }
+}
+
+@keyframes ssc-chase {
+  0%, 100% { opacity: 0.25; transform: scale(1); box-shadow: 0 0 0 rgba(47, 111, 237, 0); }
+  35% { opacity: 1; transform: scale(1.7); box-shadow: 0 0 8px rgba(47, 111, 237, 0.7); }
+  70% { opacity: 0.4; transform: scale(1.1); box-shadow: 0 0 0 rgba(47, 111, 237, 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ss-connector-line line { animation: none; }
+  .ssc-dots i,
+  .ss-connector.is-connecting .ssc-dots i,
+  .ss-connector.is-transferring .ssc-dots i { animation: none; opacity: 0.6; }
 }
 
 /* ---------------- 연결 완료 순간의 파란색 버스트 ---------------- */
@@ -374,54 +404,108 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(50% - 64px);
+  top: 10%;
   margin: 0;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--foreground);
-  transition: top 450ms ease;
-}
-
-.ss-intro[data-phase="found"] .ss-intro-title {
-  top: 10%;
-  font-size: 20px;
-}
-
-.ss-spinner {
-  width: 28px;
-  height: 28px;
-  margin-top: 8px;
-  border: 3px solid var(--border);
-  border-top-color: var(--foreground);
-  border-radius: 50%;
-  animation: ss-spin 0.8s linear infinite;
-}
-
-.ss-intro[data-phase="found"] .ss-spinner {
-  display: none;
-}
-
-@keyframes ss-spin {
-  to { transform: rotate(360deg); }
 }
 
 /* 패널 안의 활성 폰과 같은 크기·위치(scale 1.4, 가운데)로 놓아서 분리될 때 끊김 없이 이어지게 함 */
-.ss-intro-device {
+.ss-intro-device .ss-frame {
+  transform: scale(0.94);
+  transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ss-intro[data-phase="found"] .ss-intro-device .ss-frame {
+  transform: scale(1);
+}
+
+/* 감지 전: 폰 프레임 스켈레톤이 은은하게 깜빡임 → 감지되면 실제 프레임과 화면으로 교체 */
+.ss-intro-device .ss-frame-img,
+.ss-intro-device .ss-screen {
   opacity: 0;
   transition: opacity 450ms ease;
 }
 
-.ss-intro[data-phase="found"] .ss-intro-device {
+.ss-intro[data-phase="found"] .ss-intro-device .ss-frame-img,
+.ss-intro[data-phase="found"] .ss-intro-device .ss-screen {
   opacity: 1;
+}
+
+.ss-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 3.5%;
+  border-radius: 17% / 8%;
+  background: var(--border);
+  animation: ss-skeleton-pulse 1.2s ease-in-out infinite;
+  transition: opacity 450ms ease;
+}
+
+.ss-intro[data-phase="found"] .ss-skeleton {
+  opacity: 0;
+  animation: none;
+}
+
+.sk-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 14% / 6.5%;
+  background: var(--muted);
+}
+
+.sk-island {
+  position: absolute;
+  top: 3%;
+  left: 50%;
+  width: 30%;
+  height: 3.6%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #d4d4d4;
+}
+
+.sk-grid {
+  position: absolute;
+  top: 14%;
+  left: 9%;
+  right: 9%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14% 10%;
+}
+
+.sk-grid i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 26%;
+  background: var(--border);
+}
+
+.sk-dock {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 3%;
+  height: 10%;
+  border-radius: 24% / 40%;
+  background: var(--border);
+}
+
+@keyframes ss-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 
 .ss-intro-device .ss-device {
   transform: scale(1.4);
 }
 
-.ss-intro-device .ss-pill,
-.ss-intro-device .ss-caption {
+.ss-intro-device .ss-pill {
   visibility: hidden;
 }
 
@@ -431,7 +515,7 @@
   pointer-events: none;
 }
 
-/* ---------------- 시나리오 전환 버튼 (모든 화면이 끝나면 오른쪽 아래에 표시) ---------------- */
+/* ---------------- Secret scenario switch (invisible, bottom-right; 5 consecutive taps) ---------------- */
 
 .ss-next-btn {
   all: unset;
@@ -440,18 +524,100 @@
   right: 12px;
   bottom: 12px;
   z-index: 20;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--background);
-  color: var(--muted-foreground);
-  font-family: "Pretendard", "Apple SD Gothic Neo", -apple-system, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
+  width: 56px;
+  height: 40px;
+  opacity: 0; /* invisible secret button */
+  -webkit-tap-highlight-color: transparent;
 }
 
-.ss-next-btn:hover {
-  border-color: var(--ring);
-  color: var(--foreground);
+/* ---------------- 가이드 핫스팟 (파란 원형 하이라이트) ---------------- */
+
+.ss-hotspot {
+  position: absolute;
+  z-index: 1;
+  border-radius: 50%;
+  border: 2px solid #2f6fed;
+  background: rgba(47, 111, 237, 0.28);
+  box-shadow: 0 0 0 0 rgba(47, 111, 237, 0.5);
+  pointer-events: none;
+  animation: ss-hotspot-pulse 1.4s ease-out infinite;
+}
+
+@keyframes ss-hotspot-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(47, 111, 237, 0.5); }
+  100% { box-shadow: 0 0 0 12px rgba(47, 111, 237, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-hotspot { animation: none; }
+}
+
+/* ---------------- Quick Share: 사진이 보내는 폰에서 튀어나와 받는 폰으로 들어가는 연출 ---------------- */
+
+.ss-flyer {
+  position: absolute;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.qs-flying-photo {
+  position: absolute;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  background-color: var(--muted);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Smart Switch 데이터 전송: 파일·데이터·이미지·영상을 나타내는 아이콘 칩 */
+.ss-data-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: #2f6fed;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.ss-data-chip svg {
+  width: 55%;
+  height: 55%;
+}
+
+/* ---------------- 연결되면 폰 뒤에서 은은하게 퍼지는 면 파동 ---------------- */
+
+.ss-frame::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  box-sizing: border-box;
+  border-radius: 17% / 8%;
+  background: rgba(47, 111, 237, 0.2);
+  filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stage.is-connected .ss-frame::after {
+  animation: ss-frame-ripple 3s ease-out infinite;
+}
+
+/* 전송 중: 파동이 조금 빨라짐 */
+.stage.is-xfer .ss-frame::after {
+  animation-duration: 2s;
+}
+
+@keyframes ss-frame-ripple {
+  0% { transform: scale(1); opacity: 0.45; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage.is-connected .ss-frame::after { animation: none; }
 }
